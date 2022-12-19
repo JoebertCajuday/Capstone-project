@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "capstone-proj",
+    "slug": "capstone-proj",
+    "version": "1.0.0",
+    "plugins": [
+      "expo-image-picker"
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "dd73a0e5-c8a5-46b6-877f-d5839b52691c"
+      }
+    }
+  },
+  "name": "capstone-proj"
+}

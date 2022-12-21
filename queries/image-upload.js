@@ -1,7 +1,7 @@
 import supabase from '../lib/supabase';
 //import * as FileSystem from 'expo-file-system';
 import { decode } from 'base64-arraybuffer';
-import { ATTACHMENTS_URL } from '@env'
+//import { ATTACHMENTS_URL } from '@env'
 
 const splitTest = function (str) {
   return str.split('\\').pop().split('/').pop();
@@ -28,7 +28,7 @@ export default async function upload_id(obj, folder) {
 export const upload_image = async (obj, folder, bucket) => {
 
   const fileName = await splitTest(obj.uri);
-  const key = ATTACHMENTS_URL
+  const key = process.env.ATTACHMENTS_URL
 
   const { data, error } = await supabase.storage
   .from(`${bucket}`)

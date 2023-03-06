@@ -1,11 +1,12 @@
-import React, { useState, createContext } from 'react';
+//import React, { useState, createContext } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer' 
-import { AntDesign, Ionicons } from '@expo/vector-icons';
-import getProfile from '../queries/fetch-profile';
-import { Loading } from '../components/loading';
+import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+//import { MaterialCommunityIcons } from '@expo/vector-icons';
+//import getProfile from '../queries/fetch-profile';
+//import { Loading } from '../components/loading';
 
 /** Routes Folder */
 import About from './about';
@@ -23,7 +24,7 @@ import Other from '../screens/other';
 import PinCode from '../screens/passCode';
 import ReportDetails from '../screens/report-details';
 import EmergencyHotlines from '../screens/hotlines';
-
+import ReportSummary from '../screens/report-summary'
 
 const stackHeaderStyle = { 
   headerStyle: { backgroundColor: '#ff6666', justifyContent: 'center',}, 
@@ -45,14 +46,17 @@ function HomeStack( { navigation } ) {  // Stack Navigation for Home
       <Stack.Navigator initialRouteName="Home" screenOptions={stackHeaderStyle} >
         <Stack.Screen name="Home" component={Home} options = {
           { headerLeft: () => (
-              <AntDesign name='bars' size={30} color='white' onPress={()=>navigation.openDrawer()} 
-                style={styles.stackHeader} /> 
+              <AntDesign name='bars' size={30} color='white' 
+                onPress={()=>navigation.openDrawer()} 
+                style={styles.stackHeader} 
+              /> 
             ),
             headerRight: () => (
               <View style={{flexDirection: 'row'}}>
-
-                <Ionicons name='call' size={30} color='white' onPress={()=>navigation.navigate('Hotlines')} 
-                  style={{marginLeft: 10}} />
+                <Ionicons name='call' size={30} color='white' 
+                  onPress={()=>navigation.navigate('Hotlines')} 
+                  //style={{marginLeft: 100}} 
+                />
               </View> 
             )
           }} />
@@ -92,11 +96,21 @@ function ReportStack( { navigation } ) {  // Stack Navigation for Profile
     <Stack3.Navigator initialRouteName="Reports" screenOptions={stackHeaderStyle} >
       <Stack3.Screen name="Reports" component={Reports} options = {
         { headerLeft: () => (
-            <AntDesign name='bars' size={30} color='white' onPress={()=>navigation.openDrawer()} 
-              style={styles.stackHeader} /> 
+            <AntDesign name='bars' size={30} color='white' 
+              onPress={()=>navigation.openDrawer()} 
+              style={styles.stackHeader} 
+            /> 
           ),
+          headerRight: () => (
+            <View style={{flexDirection: 'row'}}>
+              <MaterialCommunityIcons name="export-variant" size={30} color="white" 
+                onPress={()=>navigation.navigate('Report Summary')}
+              />
+            </View> 
+          )
         }} />
       <Stack3.Screen name="Report Details" component={ReportDetails} options={{title: ''}} />
+      <Stack3.Screen name="Report Summary" component={ReportSummary} options={{title: 'Report Summary'}} />
     </Stack3.Navigator>
   )
 }

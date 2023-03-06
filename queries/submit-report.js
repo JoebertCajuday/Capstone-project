@@ -2,47 +2,46 @@ import { useMutation } from '@tanstack/react-query';
 import supabase from '../lib/supabase';
 
 const submit_report = async (object) => {
+    try{
+        const { data, error } = await supabase.from('reports')
+        .insert([object])
+        .select()
 
-    const { data, error } = await supabase
-    .from('reports')
-    .insert([object])
-    .select()
-
-    if(error) { return { error: error.message} }
-
-    // return data as object
-    return data[0]
+        if(error) { throw new Error(error.message) }
+        
+        return data[0] // return data as object
+    }
+    catch(err){ throw new Error(err) }
 };
-export default submit_report;
-
 
 
 
 export const fetchQuestions = async () => {
+    try{
+        const { data, error } = await supabase.from('questions')
+        .select('*')
 
-    const { data, error } = await supabase
-    .from('questions')
-    .select('*')
+        if(error) { throw new Error(error.message) }
 
-    if(error) { return { error: error.message} }
-
-    // return array
-    return data
+        return data // return an array
+    }
+    catch(err) { throw new Error(err) }
 }
 
 
 
 export const fetchOptions = async (id) => {
+    try{
+        const { data, error } = await supabase.from('question_options')
+        .select('*')
+        .eq('question_id', id)
 
-    const { data, error } = await supabase
-    .from('question_options')
-    .select('*')
-    .eq('question_id', id)
+        if(error) { throw new Error(error.message) }
 
-    if(error) { return { error: error.message} }
-
-    //console.log(data)
-
-    // return array
-    return data
+        return data // array
+    }
+    catch(err){ throw new Error(err) }
 }
+
+
+export default submit_report;

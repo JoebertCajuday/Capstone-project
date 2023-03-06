@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import getReports, { getRprt } from '../queries/fetch-reports';
+import { Loading } from '../components/loading';
+
+/////////////////////////////////////////////////////////////////
+
+import getReports, { getAllReports, getRprt } from '../queries/fetch-reports';
 //import { queryClient } from '../lib/global-utils';
 import supabase from '../lib/supabase';
-import { Loading } from '../components/loading';
 
 
 const ReportContainer = ({reload, ...props}) => {
@@ -15,6 +18,8 @@ const ReportContainer = ({reload, ...props}) => {
   // get report by id
   async function getData() {
     const data = await getRprt(props.reportId)
+    .catch(err => { return Alert.alert('Request Failed', `${err}`)})
+
     if(data) { setReport(data) }
   }
 
@@ -51,15 +56,16 @@ const ReportContainer = ({reload, ...props}) => {
 
 export default function Reports({navigation, route}) {
 
-  const [data, setData] = useState(null)
+  //const [data, setData] = useState(null)
   const [reload, setReload] = useState(false)
 
-  async function getData() {
+  const { data: allreports, isLoading, isError } = getAllReports(reload);
+
+  /*async function getData() {
     const data = await getReports()
     if(data) { setData(data) }
-  }
-
-  useEffect( ()=> { getData() }, [])
+  }*/
+  //useEffect( ()=> { getData() }, [])
 
   // subscribe to all realtime events
   useEffect( () => {
@@ -69,21 +75,19 @@ export default function Reports({navigation, route}) {
     'postgres_changes',
     { event: '*', schema: 'public', table: 'reports' },
     (payload) => {
-      if(payload.eventType === 'INSERT'){ //setData(name => [...name, payload.new])
-        setData(name => [payload.new, ...name])
-      }
-
-      else setReload(payload.new)
+      //if(payload.eventType === 'INSERT'){ //setData(name => [...name, payload.new])
+        //setData(name => [payload.new, ...name])
+      //}
+      //else 
+      setReload(payload)
     }
-  )
-  .subscribe()
+  ).subscribe()
 
   return () => { supabase.removeChannel(reports) }
   }, [])
 
 
-
-  return(
+  /*return(
     <View style={styles.container}>
 
       {!data && ( <Loading /> )}
@@ -91,6 +95,33 @@ export default function Reports({navigation, route}) {
       {data && (
         <ScrollView>
           {data.map( obj => {
+              return (<ReportContainer key={`${obj.id}`} reportId={obj.id} reload={reload}/>)
+            }) 
+          }        
+        </ScrollView>
+      )}
+    </View>
+  )*/
+
+  return(
+    <View style={styles.container}>
+
+      {isLoading && ( <Loading /> )}
+
+      {isError && (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <Text>Failed to fetch reports. Please check your internet connection and try again.</Text>
+
+          <TouchableOpacity onPress={() => setReload(true)}
+            style={{padding: 10, borderWidth: 0.5, borderColor: '#9999', borderRadius: 3, marginTop: 10}}>
+            <Text>RETRY</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {allreports && (
+        <ScrollView>
+          {allreports.map( obj => {
               return (<ReportContainer key={`${obj.id}`} reportId={obj.id} reload={reload}/>)
             }) 
           }        

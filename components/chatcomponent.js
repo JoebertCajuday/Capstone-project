@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TextInput, Alert, Image} from 'react-native';
-import MessageContainer, { QuestionContainer, ImageContainer, CameraAddon } from './chat-addons'
+import { useEffect, useState, useRef } from 'react';
+import { StyleSheet, View, TouchableOpacity, ScrollView, TextInput, Alert, Image} from 'react-native';
+import MessageContainer, { QuestionContainer, CameraAddon } from './chat-addons'
+import AttachmentDisplayer from './attach-component';
+import LoadingScreen from '../components/loading';
 
-//import { queryClient } from '../lib/global-utils';
-import LoadingScreen, { Loading } from '../components/loading';
 import { pushMessage, loadMessage, loadSilentMessage, pushSilentMessage, fetchSilentMessage, fetchNormalMessage } from '../queries/messages';
 import { Ionicons } from '@expo/vector-icons';
 import { fetchImage, upload_image,} from '../queries/image-upload';
@@ -17,9 +17,7 @@ export default function ChatComp({onSendCallback=()=>{}, report, user, ...props}
     const [messageList, setMessageList] = useState(null)
     const [message, setMessage] = useState(null)
     const [questions, setQuestions] = useState(null)
-
-    // container for report attachments
-    const [attachedImg, setAttachedImg] = useState(null) 
+ 
 
     // container for captured image
     const [image, setImage] = useState(null) 
@@ -38,7 +36,10 @@ export default function ChatComp({onSendCallback=()=>{}, report, user, ...props}
         if(props.silent) { 
             let url = null
 
-            if(image){ url = await upload_image(image, 'reports', 'reportattachments') }
+            if(image){ 
+                url = await upload_image(image, 'reports', 'reportattachments') 
+                .catch(err => { return })
+            }
 
             const obj = {
                 report_id: report?.id,
@@ -48,6 +49,7 @@ export default function ChatComp({onSendCallback=()=>{}, report, user, ...props}
             }
 
             const response = await pushSilentMessage(obj)
+            .catch(err => { return Alert.alert('Failed', `Please try again later. \n ${err}`)})
 
             if(response) { setLoading(false) }
 
@@ -60,7 +62,10 @@ export default function ChatComp({onSendCallback=()=>{}, report, user, ...props}
         else{
             let url = null
             
-            if(image){ url = await upload_image(image, 'reports', 'reportattachments') }
+            if(image){ 
+                url = await upload_image(image, 'reports', 'reportattachments')
+                .catch(err => { return })
+            }
 
             const obj = {
                 report_id: report?.id,
@@ -69,6 +74,10 @@ export default function ChatComp({onSendCallback=()=>{}, report, user, ...props}
                 attachments: url,
             }
             const response = await pushMessage(obj)
+            .catch(err => { 
+                setLoading(false)
+                return Alert.alert('Failed', `Please try again later. \n ${err}`)
+            })
 
             if(response) { setLoading(false) }
             
@@ -90,33 +99,32 @@ export default function ChatComp({onSendCallback=()=>{}, report, user, ...props}
     // Load initial data and messages
     useEffect( ()=> {
         (async () => {
-
             setMessageList([])
 
             // Questions for silent type
             if(props.silent) { 
                 const question = await fetchQuestions()
+                .catch(err => { return Alert.alert('Failed', `Please try again later. \n ${err}`)})
+                
                 if(question){ setQuestions(question) }
             }
 
             //For Report messages
             if((user?.user_id === report?.sender_id || user?.role !== 1) && !props.silent) {
                 const messages = await loadMessage(report?.id)
+                .catch(err => { return Alert.alert('Failed', `Please try again later. \n ${err}`)})
+
                 if(messages){ setMessageList(messages) }
             }
 
             // For silent types
             if((user?.user_id === report?.sender_id || user?.role !== 1) && props.silent && report) {
                 const messages = await loadSilentMessage(report?.id)
+                .catch(err => { return Alert.alert('Failed', `Please try again later. \n ${err}`)})
+
                 if(messages){ setMessageList(messages) }
             }
 
-            // Report attachments
-            if(report?.attachments){ // fetch images if there is any
-                let images = await fetchImage(report?.id)
-                if(images) { setAttachedImg(images) }
-                else alert('Failed to fetch report images')
-            }
         })()
     }, [])
 
@@ -124,6 +132,8 @@ export default function ChatComp({onSendCallback=()=>{}, report, user, ...props}
     const fetchSltMsg = async (msgObject) => {
 
         let messageX = await fetchSilentMessage(msgObject.id)
+        .catch(err => { return Alert.alert('Failed', `Please try again later. \n ${err}`)})
+
         if(messageX.error) { return }
 
         setMessageList(name => [...name, messageX])
@@ -140,6 +150,8 @@ export default function ChatComp({onSendCallback=()=>{}, report, user, ...props}
     const fetchNrmlMsg = async (msgObject) => {
 
         let messageX = await fetchNormalMessage(msgObject.id)
+        .catch(err => { return Alert.alert('Failed', `Please try again later. \n ${err}`)})
+
         if(messageX.error) { return }
 
         setMessageList(name => [...name, messageX])
@@ -183,10 +195,8 @@ export default function ChatComp({onSendCallback=()=>{}, report, user, ...props}
     <>
         <ScrollView style={styles.container}  ref={scrollViewRef}  showsVerticalScrollIndicator={false} >
 
-
             {props.silent && props.qController && questions?.map( obj => (
-                <QuestionContainer  key={`${obj.id}`}
-                    user={user}
+                <QuestionContainer key={`${obj.id}`} user={user}
                     reportId={report?.id} 
                     questionId={obj.id}
                     questionTxt={obj.question}
@@ -195,12 +205,7 @@ export default function ChatComp({onSendCallback=()=>{}, report, user, ...props}
                 />
             )) }
 
-
-            {attachedImg && attachedImg.map( obj => (
-                <ImageContainer key={`${obj.file_url}`}  fileUrl={obj.file_url}  user={user}
-                  report={report}/>
-            )) }
-
+            <AttachmentDisplayer report={report} user={user} />
 
             {report?.message && (
                 <MessageContainer key={`${report?.id}`} 

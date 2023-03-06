@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, StatusBar, Keyboard } from 'react-native';
 //import * as SecureStore from 'expo-secure-store';
+
+///////////////////////////////////////////////////////////
 
 import supabase from '../lib/supabase';
 
@@ -40,9 +42,6 @@ export default function Login() {
 
       if(error){ handleError(`Email / password don't match`, 'invalidCredential');}
 
-      //if(data) {
-        //console.log(data.user);
-      //}
       setLoading(false)
     }
 

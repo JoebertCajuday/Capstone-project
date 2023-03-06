@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Alert, Image} from 'react-native';
-import ImageViewer from './image-viewer';
+import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
+
 import { fetchOptions } from '../queries/submit-report';
 import { pushSilentMessage } from '../queries/messages';
 import * as ImagePicker from 'expo-image-picker'
 import { ImageCont } from '../routes/report-modal';
 
 
-import { FontAwesome, Ionicons } from '@expo/vector-icons';
-//import supabase from '../lib/supabase';
+import { FontAwesome } from '@expo/vector-icons';
 
 
 export default function MessageContainer({obj, ...props}){
@@ -106,9 +105,7 @@ export const QuestionContainer = ({onSend=()=>{}, user, reportId, ...props}) => 
     const delaySubmit = () =>  setTimeout(() => pushToSilentMsg(), 2000)
 
 
-    useEffect( ()=> {
-        if(reportId && pressed){ delaySubmit() }
-    }, [reportId])
+    useEffect( ()=> { if(reportId && pressed){ delaySubmit() } }, [reportId])
 
 
     return (
@@ -129,23 +126,6 @@ export const QuestionContainer = ({onSend=()=>{}, user, reportId, ...props}) => 
             </View>
         </View>
 
-    )
-}
-
-
-
-
-export const ImageContainer = (props) => {
-    const [openViewer, setOpenViewer] = useState(false)
-
-    return (
-        <View style={{alignItems: props.report?.sender_id === props.user?.user_id ? 'flex-end' : 'flex-start'}}>
-            <TouchableOpacity style={styles.imageBtn} onPress={() => setOpenViewer(true) } >
-                <Image source={{uri: `${props.fileUrl}`, scale: 1}} style={{height: 130, width: 100, borderRadius: 5}}/>
-
-                <ImageViewer ImageUri={props.fileUrl} visible={openViewer} onClose={()=>setOpenViewer(false)} />
-            </TouchableOpacity>
-        </View>
     )
 }
 

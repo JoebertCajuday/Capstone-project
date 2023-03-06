@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
@@ -19,19 +19,19 @@ export default function InvolvedCounter ({counter=()=>{}}) {
         
         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
           <TouchableOpacity style={styles.btn} 
-          onPress={()=> { 
-            setCount(count + 1)
-            counter(count + 1)
-            }} >
+            onPress={()=> { 
+              setCount(count + 1)
+              counter(count + 1)
+              }} >
 
             <Feather name="plus" size={30} color="black" />
           </TouchableOpacity>
 
 
           <TouchableOpacity style={styles.btn} 
-          onPress={()=> { if(count !== 0) {
-            setCount(count - 1) 
-            counter(count - 1)
+            onPress={()=> { if(count !== 0) {
+              setCount(count - 1) 
+              counter(count - 1)
             }}} >
 
             <Feather name="minus" size={30} color="black" />

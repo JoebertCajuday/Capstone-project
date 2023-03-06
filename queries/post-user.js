@@ -3,38 +3,41 @@ import supabase from '../lib/supabase';
 
 
 export default async function insertToProfile(obj) {
+    try{
+        const { data, error } = await supabase.from('users_profile')
+        .insert([obj])
 
-    const { data, error } = await supabase
-    .from('users_profile')
-    .insert([obj])
-
-    if(error) { return { error: error.message} }
-    return data 
+        if(error) { throw new Error('Unknown error occured') }
+        return data
+    }
+    catch(err){ throw new Error(err) } 
 }
 
 
 
 export const insertToResponders = async (obj) => {
+    try{
+        const { data, error } = await supabase.from('responders')
+        .insert([obj])
+        .select()
 
-    const { data, error } = await supabase
-    .from('responders')
-    .insert([obj])
-    .select()
-
-    if(error) { return { error: error.message} }
-    return data[0] // return object
+        if(error) { throw new Error('Unknown error occured') }
+        return data[0] // return object
+    }
+    catch(err){ throw new Error(err) }
 }
 
 
 export const insertToUnames = async (obj) => {
+    try{
+        const { data, error } = await supabase.from('usernames')
+        .insert([obj])
+        .select()
 
-    const { data, error } = await supabase
-    .from('usernames')
-    .insert([obj])
-    .select()
-
-    if(error) { return { error: error.message} }
-    return data[0] // return object
+        if(error) { throw new Error('Unknown error occured') }
+        return data[0] // return object
+    }
+    catch(err){ throw new Error(err) }
 }
 
 

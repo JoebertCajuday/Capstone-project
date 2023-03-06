@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+//import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, } from 'react-native';
 import Modal from 'react-native-modal';
 
@@ -17,7 +17,7 @@ export default function Logout({navigation}) {
     logout();
   }
 
-  async function logout() { const { error } = await supabase.auth.signOut() }
+  const logout = async () => { const { error } = await supabase.auth.signOut() }
 
   return (
     <Modal isVisible>

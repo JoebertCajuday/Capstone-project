@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert, } from 'react-native';
+
+/////////////////////////////////////////
 
 import ReportHeader from '../components/reportheader';
 import { ReqPolice } from '../components/request-checkbox';
@@ -8,8 +10,7 @@ import InvolvedCounter from '../components/involved-counter';
 import { Loading } from '../components/loading';
 
 import submit_report from '../queries/submit-report';
-//import getProfile from '../queries/fetch-profile';
-import { queryClient } from '../lib/global-utils';
+import getProfile from '../queries/fetch-profile';
 
 
 
@@ -19,23 +20,21 @@ export default function Conflicts({ navigation, route }) {
   const barangay = route.params?.barangay
   const brgyName = route.params.brgyName
 
-  const [user, setUser] = useState(null)
-  const [report, setReport] = useState(null)
+  const { data: user } = getProfile();
 
-  //const [loading, setLoading] = useState(false)
+  const [report, setReport] = useState(null)
 
   // state for inputs
   const [reqState, setReqState] = useState(false);
   const [count, setCount] = useState(0);
-  const [message, setMessage] = useState(null)
+  //const [message, setMessage] = useState(null)
   const [attachments, setAttach] = useState()
  
-  const [button, setButton] = useState(false);
   const reqHandler = value => { setReqState(value) }
 
   
   const submit = async () => {
-    setButton(true)
+    //setButton(true)
 
     // Accident type = 3
     const object = {
@@ -43,7 +42,6 @@ export default function Conflicts({ navigation, route }) {
       type:           3,
       location:       location?? null,
       assistance:     reqState,
-      message:        message,
       attachments:    attachments,
       involved_count: count,
       brgy:           barangay,
@@ -51,37 +49,31 @@ export default function Conflicts({ navigation, route }) {
     }
 
     let result = await submit_report(object)
+    .catch(err => { 
+      return Alert.alert('Request failed', 
+      `Please try again later or check your account status \n ${err}`)
+    })
     
-    if(result?.error){ 
-      return Alert.alert('Request failed', 'Please try again later or check your account status')
-    }
-    else { setReport(result) }
+    //if(result?.error){ 
+      //return Alert.alert('Request failed', 'Please try again later or check your account status')
+    //}
+    //else { 
+    setReport(result) 
+    //}
   }
 
 
   const navigateToHome = () => { navigation.navigate('Home', {id: report.id}) }
 
- 
-  useEffect(()=> {
-    (async () => {
-      const profile = await queryClient.getQueryData({queryKey: ['userProfile']})
-      if(profile) { setUser(profile)}
-      
-    })()
-  }, [])
-
   useEffect(() => { if(route.params?.submit){ submit()}}, [route.params?.submit])
 
 
   return (
-
     <View style={styles.container}>
-
       {!user && ( <Loading /> )}
 
       {user && (
       <>
-
         <ScrollView style={{flex: 1}}>
 
           <ReportHeader imageUri={require('../assets/fight.png')} 
@@ -100,10 +92,9 @@ export default function Conflicts({ navigation, route }) {
 
         <View style={styles.btnContainer} >
 
-          <TouchableOpacity style={[styles.submitBtn, {opacity: button ? 0.3 : 1}]} 
-          disabled={button} 
-          onPress={()=>navigation.navigate('PinCode', 
-          {routeBack: 'Conflicts', location: location, barangay: barangay})}>
+          <TouchableOpacity style={[styles.submitBtn, {opacity: route?.params?.submit ? 0.3 : 1}]} 
+            disabled={route?.params?.submit?? false} 
+            onPress={()=>navigation.navigate('PinCode', {routeBack: 'Conflicts', location: location, barangay: barangay})}>
               
             <Text style={{fontSize: 20, fontWeight: 'bold', color: '#fff'}}>Submit Report</Text>
           </TouchableOpacity>

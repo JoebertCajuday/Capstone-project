@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
+
+//////////////////////////////////////////////////////
 
 import ReportHeader from '../components/reportheader';
 import ReqAmbulance from '../components/request-checkbox';
@@ -8,7 +10,7 @@ import OptionalMessage from '../components/option-message';
 import { Loading } from '../components/loading';
 
 import submit_report from '../queries/submit-report';
-import { queryClient } from '../lib/global-utils';
+import getProfile from '../queries/fetch-profile';
 
 
 export default function Fire( { navigation, route } ) {
@@ -16,7 +18,8 @@ export default function Fire( { navigation, route } ) {
   const barangay = route.params?.barangay
   const brgyName = route.params.brgyName
 
-  const [user, setUser] = useState(null)
+  const { data: user } = getProfile();
+
   const [report, setReport] = useState(null)
 
 
@@ -25,13 +28,13 @@ export default function Fire( { navigation, route } ) {
   const [message, setMessage] = useState(null)
   const [attachments, setAttach] = useState(null)
 
-  const [button, setButton] = useState(false); // to disable button after send
+  //const [button, setButton] = useState(false); // to disable button after send
 
   const reqHandler = value => { setReqState(value) } // Bouncy checkbox handler
   
 
   const submit = async () => {
-    setButton(true)
+    //setButton(true)
 
     const object = {
       sender_id:    user?.user_id,
@@ -45,25 +48,30 @@ export default function Fire( { navigation, route } ) {
     }
 
     let result = await submit_report(object)
+    .catch(err => { 
+      return Alert.alert('Request failed', 
+      `Please try again later or check your account status \n ${err}`)
+    })
     
-    if(result?.error){ 
-      return Alert.alert('Request failed', 'Please try again later or check your account status') 
-    }
-    else { setReport(result) }
+    //if(result?.error){ 
+      //return Alert.alert('Request failed', 'Please try again later or check your account status') 
+    //}
+    //else { 
+    setReport(result) 
+    //}
   }
-
 
 
   const navigateToHome = () => { navigation.navigate('Home') }
 
 
-  // Fetch profile
+  /* Fetch profile
   useEffect(()=> {
     (async () => {
       const profile = await queryClient.getQueryData({queryKey: ['userProfile']})
       if(profile) { setUser(profile)}
     })()
-  }, [])
+  }, [])*/
   
 
   // submit Report after successful passcode entry
@@ -71,12 +79,10 @@ export default function Fire( { navigation, route } ) {
 
   return (
     <View style={styles.container}>
-
       {!user && ( <Loading /> )}
       
       {user && (
         <>
-
           <ScrollView style={{flex: 1}}>
 
             <ReportHeader imageUri={require('../assets/flames.png')}  type="Fire"
@@ -94,10 +100,9 @@ export default function Fire( { navigation, route } ) {
 
           <View style={styles.btnContainer} >
 
-            <TouchableOpacity style={[styles.submitBtn, {opacity: button ? 0.3 : 1}]} 
-              disabled={button}  
-              onPress={()=>{ 
-                navigation.navigate('PinCode', {routeBack:'Fire', location :location, barangay: barangay }) }}>
+            <TouchableOpacity style={[styles.submitBtn, {opacity: route?.params?.submit ? 0.3 : 1}]} 
+              disabled={route?.params?.submit?? false}  
+              onPress={()=>{ navigation.navigate('PinCode', {routeBack:'Fire', location :location, barangay: barangay }) }}>
                 
               <Text style={{fontSize:20, fontWeight:'bold', color:'#fff'}}>Submit Report</Text>
             </TouchableOpacity>

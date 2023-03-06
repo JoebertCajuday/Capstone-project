@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Image, View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 import { AntDesign } from '@expo/vector-icons';
-import { Feather } from '@expo/vector-icons';
+//import { Feather } from '@expo/vector-icons';
 
 
 export default function IdPicker(

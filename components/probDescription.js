@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput} from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import { StyleSheet, 
+  //Text, 
+  View, 
+  //TouchableOpacity, 
+  TextInput} from 'react-native';
+//import { FontAwesome } from '@expo/vector-icons';
 
 export default function ProblemDescription({onInput=()=> {} ,...props}) {
 

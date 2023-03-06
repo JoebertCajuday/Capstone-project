@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 
 import ReportHeader from '../components/reportheader';
@@ -6,7 +6,6 @@ import RescueHotlines from '../components/rescue-hotlines';
 import { Loading } from '../components/loading';
 
 import getProfile, { hotlines } from '../queries/fetch-profile';
-import { queryClient } from '../lib/global-utils';
 import submit_report from '../queries/submit-report'
 
 
@@ -17,15 +16,12 @@ export default function Rescue({ navigation, route }) {
   const barangay = route.params?.barangay
   const brgyName = route.params.brgyName
 
-  const [user, setUser] = useState(null)
-  const [numbers, setNumbers] = useState([])
+  const { data: user } = getProfile();
 
-  const [button, setButton] = useState(false);
-
+  const [numbers, setNumbers] = useState(null)
 
   // Submit report Rescue is type 5
   const submit = async () => {
-    setButton(true)
 
     const object = {
       sender_id:    user?.user_id,
@@ -38,33 +34,37 @@ export default function Rescue({ navigation, route }) {
     }
     
     let result = await submit_report(object)
+    .catch(err => { return Alert.alert('Request failed', `${err}`) })
     
-    if(result?.error){ return Alert.alert('Request failed', 'Please try again later or check your account status') }
-    else { navigation.navigate('Home') }
-
-    console.log(object)
+    //if(result?.error){ return Alert.alert('Request failed', 'Please try again later or check your account status') }
+    //else { 
+      navigation.navigate('Home') 
+    //}
   }
 
 
   useEffect( ()=> {
-    // fetxh hotlines & profile
+    // fetch hotlines & profile
     (async ()=> {
+      let alertVar = false;
+
       const result = await hotlines(4) // Mdrrmo number
+      .catch(err => { return alertVar = err })
+
       const brgyNum = await hotlines(barangay, true)
+      .catch(err => { return alertVar = err })
 
       if(brgyNum && result){ setNumbers([result, brgyNum]) }
-      else setNumbers([result])
+      //else setNumbers([result])
 
-      const profile = await queryClient.getQueryData({queryKey: ['userProfile']})
-      if(profile) { setUser(profile) }
+      if(alertVar){ return Alert.alert('Request failed', `Please try again later. \n${alertVar}`) }
   })()
-
   }, [])
 
 
   useEffect( () => { if (route.params?.submit) { submit() } }, [route.params?.submit] )
-
   
+
   return (
     <View style={styles.container}>
       {!user && ( <Loading /> )}
@@ -78,17 +78,16 @@ export default function Rescue({ navigation, route }) {
               sender={`${user?.username.fullname}`}
             />
 
-            {numbers && (
-              numbers.map(obj => {
+            {numbers && numbers.map(obj => {
                 return (
-                  <RescueHotlines headerTitle={`${obj.dept.dept_name?? obj.barangay.brgy_name}`} 
-                    headerDescription={`${!obj.brgy ? 'MDRRMO' : 'Barangay'}`} 
-                    hotlineNum={obj.number}
-                    key={obj.id}
+                  <RescueHotlines headerTitle={`${obj?.dept?.dept_name?? obj?.barangay?.brgy_name}`} 
+                    headerDescription={`${!obj?.brgy ? 'MDRRMO' : 'Barangay'}`} 
+                    hotlineNum={obj?.number}
+                    key={obj?.id}
                   />
                 )
               })
-            )}
+            }
 
             <Text style={{fontSize:20, alignItems:'center', marginTop:50, alignSelf:'center'}}> or </Text>
 
@@ -96,9 +95,9 @@ export default function Rescue({ navigation, route }) {
 
           <View style={styles.btnContainer} >
 
-            <TouchableOpacity style={[styles.submitBtn, {opacity: button ? 0.3 : 1}]}   disabled={button}  
-              onPress={()=>navigation.navigate('PinCode', 
-              {routeBack: 'Rescue', location: location, barangay: barangay})}>
+            <TouchableOpacity style={[styles.submitBtn, {opacity: route?.params?.submit ? 0.3 : 1}]}   
+              disabled={route?.params?.submit?? false}  
+              onPress={()=>navigation.navigate('PinCode', {routeBack: 'Rescue', location: location, barangay: barangay})}>
                 
               <Text style={{fontSize: 20, fontWeight: 'bold', color: '#fff'}}>Send an SOS</Text>
             </TouchableOpacity>

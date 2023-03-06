@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { useState, useEffect } from 'react';
+import { StyleSheet, View, Alert } from 'react-native';
 import ReportHeader from '../components/reportheader';
 import ChatComponent from '../components/chatcomponent'
 import { Loading } from '../components/loading';
-import submit_report from '../queries/submit-report'
 
-import { queryClient } from '../lib/global-utils';
+////////////////////////////////////////////////////
+
+import submit_report from '../queries/submit-report'
+import getProfile from '../queries/fetch-profile';
 
 
 export default function Silent({navigation, route}) {
@@ -14,12 +16,12 @@ export default function Silent({navigation, route}) {
   const barangay = route.params?.barangay
   const brgyName = route.params.brgyName
 
-  const [user, setUser] = useState(null)
+  const { data: user } = getProfile();
+
   const [report, setReport] = useState(null)
 
   const showPasscode = () => {
-    navigation.navigate('PinCode', 
-      {routeBack:'Silent', location :location, barangay: barangay })
+    navigation.navigate('PinCode', {routeBack:'Silent', location: location, barangay: barangay })
   }
 
   
@@ -34,24 +36,21 @@ export default function Silent({navigation, route}) {
     }
 
     let result = await submit_report(object)
+    .catch(err => { 
+      return Alert.alert('Request failed', 
+      `Please try again later or check your account status \n ${err}`)
+    })
     
-    if(result?.error){ return Alert.alert('Request failed', 'Please try again later or check your account status') }
+    //if(result?.error){ return Alert.alert('Request failed', 
+    //'Please try again later or check your account status') }
     
-    if(result) { setReport(result) }
+    //if(result) { 
+    setReport(result) //}
   }
 
 
 
   useEffect(() => { if(route.params?.submit){ submit()}}, [route.params?.submit])
-
-  
-  useEffect(()=> {
-    (async () => {
-      const profile = await queryClient.getQueryData({queryKey: ['userProfile']})
-      if(profile) { setUser(profile)}
-    })()
-  }, [])
-
 
 
   return (
@@ -86,5 +85,4 @@ export default function Silent({navigation, route}) {
 
 const styles = StyleSheet.create({
   container:{ flex: 1, backgroundColor: '#333' }, 
-
 });

@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
+
+////////////////////////////////////////////////////////////
 
 import ReportHeader from '../components/reportheader';
 import ReqAmbulance from '../components/request-checkbox';
@@ -7,9 +9,8 @@ import ImageAttachment from '../components/imageAttachments';
 import OptionalMessage from '../components/option-message';
 import { Loading } from '../components/loading';
 
-//import getProfile from '../queries/fetch-profile';
+import getProfile from '../queries/fetch-profile';
 import submit_report from '../queries/submit-report';
-import { queryClient } from '../lib/global-utils';
 
 export default function Accident({ navigation, route }) {
 
@@ -17,22 +18,18 @@ export default function Accident({ navigation, route }) {
   const barangay = route.params?.barangay
   const brgyName = route.params.brgyName
 
-  const [user, setUser] = useState(null)
-  const [report, setReport] = useState(null)
+  const { data: user } = getProfile();
 
-  //const [loading, setLoading] = useState(false)
+  const [report, setReport] = useState(null)
 
   // states for inputs
   const [reqState, setReqState] = useState(false)
   const [message, setMessage] = useState(null)
   const [attachments, setAttach] = useState()
 
-  const [button, setButton] = useState(false)
-
   const reqHandler = value => { setReqState(value) }
 
   const submit = async () => {
-    setButton(true)
 
     // Accident type = 2
     const object = {
@@ -47,30 +44,27 @@ export default function Accident({ navigation, route }) {
     }
 
     let result = await submit_report(object)
+    .catch(err => { 
+      return Alert.alert('Request failed', 
+      `Please try again later or check your account status \n ${err}`)
+    })
     
-    if(result?.error){ 
-      return Alert.alert('Request failed', 'Please try again later or check your account status') 
-    }
-    else { setReport(result) }
+    //if(result?.error){ 
+      //return Alert.alert('Request failed', 'Please try again later or check your account status') 
+    //}
+    //else { 
+    setReport(result) 
+    //}
   }
 
 
   const navigateToHome = () => { navigation.navigate('Home', {id: report.id}) }
-
-
-  useEffect(()=> {
-    (async () => {
-      const profile = await queryClient.getQueryData({queryKey: ['userProfile']})
-      if(profile) { setUser(profile)}
-    })()
-  }, [])
 
   useEffect(() => { if(route.params?.submit){ submit() }}, [route.params?.submit])
 
 
   return (
     <View style={styles.container}>
-
       {!user && ( <Loading /> )}
 
       {user && (
@@ -92,10 +86,9 @@ export default function Accident({ navigation, route }) {
 
           <View style={styles.btnContainer} >
 
-            <TouchableOpacity style={[styles.submitBtn, {opacity: button ? 0.3 : 1}]} 
-              disabled={button}  
-              onPress={()=>navigation.navigate('PinCode', 
-              {routeBack: 'Accident', location:location, barangay: barangay})}>
+            <TouchableOpacity style={[styles.submitBtn, {opacity: route?.params?.submit ? 0.3 : 1}]} 
+              disabled={route?.params?.submit?? false}  
+              onPress={()=>navigation.navigate('PinCode', {routeBack: 'Accident', location:location, barangay: barangay})}>
                 
               <Text style={{fontSize: 20, fontWeight: 'bold', color: '#fff'}}>Submit Report</Text>
             </TouchableOpacity>

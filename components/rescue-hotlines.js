@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { StyleSheet, Text, View, Linking} from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,9 +19,8 @@ export default function RescueHotlines ({ headerTitle, headerDescription, hotlin
 
        
         <TouchableOpacity style={styles.callBtn} onPress={() => onCallPress()}>
-            <Ionicons name="call" size={30} color="white" />
+            <Ionicons name="call" size={30} color="green" />
         </TouchableOpacity>
-    
         
     </View>
   );
@@ -47,8 +45,6 @@ const styles = StyleSheet.create({
     },
 
     callBtn: {
-        backgroundColor: '#00994d',
         padding: 5,
-        borderRadius: 10
     }
 });

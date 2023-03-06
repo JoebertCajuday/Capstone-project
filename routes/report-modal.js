@@ -2,43 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ActivityIndicator, Image, 
     TouchableOpacity, ScrollView, Alert, Linking} from 'react-native';
 
+///////////////////////////////////////////////////////////
+
 import Modal from "react-native-modal";
-import SelectList from 'react-native-dropdown-select-list'
+//import SelectList from 'react-native-dropdown-select-list';
 import LoadingScreen from '../components/loading';
-//import { useNavigation } from '@react-navigation/native';
-import getDirections from 'react-native-google-maps-directions'
+import getDirections from 'react-native-google-maps-directions';
 import ImageViewer from '../components/image-viewer';
+import VideoPlayerMe, { MyVideoPlayer } from '../components/video-component';
 
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { getRprt, updateReport } from '../queries/fetch-reports';
-import { queryClient } from '../lib/global-utils';
 import { fetchImage } from '../queries/image-upload';
 import supabase from '../lib/supabase';
 
-
-const ImageHeader = (props) => {
-    const label = ['', 'Fire', 'Accident', 'Conflicts', 'Other', 'Rescue', 'Silent']
-
-return(
-    <View style={[styles.row, {justifyContent: 'flex-start'}]}>
-        <Image style={{width: 75, height: 75}}
-            source={props.type === 1 ? require('../assets/flames.png') : 
-                props.type === 2 ? require('../assets/collision.png') : 
-                props.type === 3 ? require('../assets/fight.png') : 
-                props.type === 4 ? require('../assets/more.png') :
-                props.type === 5 ? require('../assets/rescue.png') :
-                require('../assets/alert.png')}
-        />
-
-        <View style={{flexDirection: 'column', justifyContent: 'flex-end', marginLeft: 10}}>
-            <Text style={{fontSize:25, color:'#ff6666', fontWeight:'bold'}}>{label[props.type]}</Text>
-            <Text style={{fontSize: 16}}>Time sent : 
-                {`    ${props.report?.created_at.substring(0, 10)}`}    
-                {`    ${props.report?.created_at.substring(11, 16)}`}
-            </Text>
-        </View>
-    </View>
-)}
 
 
 export const ImageCont = (props) => {
@@ -49,117 +26,184 @@ export const ImageCont = (props) => {
     <>
         <TouchableOpacity style={{marginHorizontal: 5}} onPress={()=> setOpenViewer(true)}>
             <Image source={{uri: `${props.fileUrl}`, scale: 1}} 
-                style={{height: 130, width: 100, borderRadius:5, borderWidth: 1}} 
-            />
+                style={{height: 120, width: 100, borderRadius:5, borderWidth: 1}} />
         </TouchableOpacity>
 
         <ImageViewer ImageUri={props.fileUrl} visible={openViewer} onClose={()=>setOpenViewer(false)} />
-
-        
     </>
     )
 }
 
 
-const VerifModal = ({visible, cbFunc=()=>{},}) => {
+const VerifModal = ({visible, initState, exitFunc=()=>{}, reportId}) => {
+
+    const [selected, setSelected] = useState(initState)
+    const [options, setOptions] = useState(null)
+    const [loading, setLoading] = useState(false)
+
+    const update = async (val) => {
+        setLoading(true)
+        const response = await updateReport(reportId , val)
+        .catch(err => { return Alert.alert('Request Failed', `${err}`)})
+
+        setLoading(false)
+        exitFunc()
+    }
+
+    // get report statuses
+    useEffect( () => {
+        (async () => {  
+            let { data: report_status, error } = await supabase.from('report_status')
+            .select('*')
+            
+            if(error) return
+            setOptions(report_status)
+        })()
+    }, [])
+
+
     return (
-    <Modal isVisible={visible}>
-        <View style={{width: '100%', backgroundColor: '#fff', borderRadius: 4, padding: 10}}>
+    <Modal isVisible={visible} onBackButtonPress={()=> exitFunc()} onBackdropPress={()=> exitFunc()} >
 
-            <Text style={{alignSelf:'center', fontSize:20}}>Confirm action</Text>
+        <LoadingScreen visible={loading} />
 
-            <Text style={{marginTop:20, fontSize:18}}>The report state will be changed to the value selected. Please click continue to confirm</Text>
+        <View style={{width: '100%', backgroundColor: '#fff', borderRadius: 4, }}>
 
-            <Text style={{marginTop:20, fontSize:16, padding: 5, backgroundColor: '#cce6ff', borderRadius: 3}}>
-                Please note that when a report is set as rejected, the user who sent the report will be blocked from sending any other reports. </Text>
+            <View style={{backgroundColor: '#cce6ff', borderColor: '#9999', 
+                borderTopLeftRadius: 5, borderTopRightRadius: 5, borderBottomWidth: 0.5, }}> 
 
-            <View style={{flexDirection:'row', justifyContent:'space-evenly', marginTop:20}}>
-                
-                <TouchableOpacity onPress={()=> cbFunc() }
-                    style={{padding: 10, borderRadius: 3, backgroundColor: '#ff6666', width: 130}}>
-                    <Text style={{alignSelf: 'center', fontSize: 18, color: '#fff'}}>CANCEL</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={()=> cbFunc(true)}
-                    style={{padding: 10, borderRadius: 3, backgroundColor: '#0099e6', width: 130}}>
-                    <Text style={{alignSelf: 'center', fontSize: 18, color: '#fff'}}>CONTINUE</Text>
-                </TouchableOpacity>
+                <Text style={{alignSelf:'center', fontSize:20, marginVertical: 10, fontWeight: 'bold', }}> 
+                    Update Report State </Text>
             </View>
+
+            
+            <View style={[styles.compContainer, {padding: 5, padding: 10,}]}>
+                
+                {options && options.map(obj => {
+                    return(
+                        <TouchableOpacity key={obj.id} onPress={() => setSelected(obj.id)}
+                            style={{paddingVertical: 10, marginVertical: 3, 
+                                borderWidth: 0.5, borderColor: '#9999',
+                                borderRadius: 3, backgroundColor: selected === obj.id ? '#ff6666' : '#ffffff',
+                            }}
+                        >
+                            <Text style={{fontSize: 16, fontWeight: 'bold', textAlign: 'center',
+                                color: selected === obj.id ? '#ffffff' : '#000000',}}>
+                                {obj.status}
+                            </Text>
+                        </TouchableOpacity>
+                    )
+                })}
+
+                <TouchableOpacity onPress={() => update(selected)}
+                    style={{paddingVertical: 10, borderWidth: 0.8, 
+                        borderColor: '#9999', borderRadius: 3, marginTop: 20, 
+                        backgroundColor: '#0033cc',
+                        opacity: initState === selected ?  0.5 : 1,}} 
+                    disabled={(initState === selected ? true : false)} 
+                >
+
+                    <Text style={{fontSize: 16, fontWeight: 'bold', textAlign: 'center', color: '#ffffff'}}>
+                        UPDATE </Text> 
+                </TouchableOpacity>
+                
+            </View>
+
         </View>
     </Modal>
     )
 }
 
 
-export const VerificationComponent = ({report, visible }) => {
+export const VerificationComponent = ({report}) => {
 
-    const [verifState, setVerif] = useState(null)
-    const [selectData, setSelectData] = useState(null)
-    const [placeHolder, setPlaceHolder] = useState(null)
     const [modal, setModal] = useState(false)
-    const [loading, setLoading] = useState(false)
-
-    const onSetVerifState = () => setModal(true)
-
-    const onProceed = async (value) => {
-        if(!value) { setModal(false); return }
-
-        setLoading(true)
-        let update = await updateReport(report?.id, verifState)
-
-        if(update.error){
-            Alert.alert('Request Failed', 'Please try again later')
-        }
-
-        setLoading(false)
-        setModal(false)
-        return
-    }
-
-    // get report statuses
-    useEffect( () => {
-        (async () => {  
-            let { data: report_status, error } = await supabase
-            .from('report_status').select('*')
-
-            if(error) return
-
-            setSelectData([])
-            report_status.map( e => {
-                setSelectData(name => [...name, {key: e.id, value: e.status}])
-            })
-        })()
-    }, [])
-
-
-    useEffect( () => {
-        if(selectData){
-            selectData.map( e => { 
-                if(e.key === report?.status){ setPlaceHolder(e.value) } 
-            })
-        }
-    }, [selectData, report])
-
 
     return (
         <>
-            <VerifModal visible={modal} cbFunc={ val => onProceed(val)}/>
+            <VerifModal visible={modal} exitFunc={()=> setModal(false)} 
+                initState={report.status} reportId={report.id} />
 
-            <LoadingScreen visible={loading} />
             <View style={[styles.compContainer, {padding: 5, margin: 5,}]}>
-                {selectData && placeHolder && (
-                <>
-                    <Text style={{fontSize: 16, marginBottom: 10}}>Set report as :</Text>
-                    <SelectList 
-                        setSelected={ value => setVerif(value)} 
-                        placeholder={`${placeHolder}`}
-                        onSelect={ () => onSetVerifState() }
-                        data={selectData} 
-                    />
-                </>
-                )}
+
+                <View style={styles.row}>
+                    <Text style={{fontSize: 18, marginBottom: 10}}> Report Status : </Text>
+                    <Text style={{fontSize: 18, marginBottom: 10}}>{report?.repStatus?.status}</Text>
+                </View>  
+
+                <TouchableOpacity onPress={()=> setModal(true)}
+                    style={{
+                        padding: 10, borderWidth: 0.5, 
+                        borderColor: '#9999', backgroundColor: '#cce6ff',
+                        borderRadius: 5, alignItems: 'center'
+                    }}
+                >
+                    <Text style={{fontSize: 16, color: '#ff6600', fontWeight: 'bold'}} > CHANGE </Text>
+                </TouchableOpacity>
             </View>
-        
+        </>
+    )
+}
+
+
+const ImageHeader = (props) => {
+    const label = ['', 'Fire', 'Accident', 'Conflicts', 'Other', 'Rescue', 'Silent']
+
+    return(
+        <View style={[styles.row, {justifyContent: 'flex-start'}]}>
+            <Image style={{width: 75, height: 75}}
+                source={props.type === 1 ? require('../assets/flames.png') : 
+                    props.type === 2 ? require('../assets/collision.png') : 
+                    props.type === 3 ? require('../assets/fight.png') : 
+                    props.type === 4 ? require('../assets/more.png') :
+                    props.type === 5 ? require('../assets/rescue.png') :
+                    require('../assets/alert.png')}
+            />
+
+            <View style={{flexDirection: 'column', justifyContent: 'flex-end', marginLeft: 10}}>
+                <Text style={{fontSize:25, color:'#ff6666', fontWeight:'bold'}}>{label[props.type]}</Text>
+                <Text style={{fontSize: 16}}>Time sent : 
+                    {`    ${props.report?.created_at.substring(0, 10)}`}    
+                    {`    ${props.report?.created_at.substring(11, 16)}`}
+                </Text>
+            </View>
+        </View>
+    )
+}
+
+
+const WhoHasAccessModal = ({visible, back=()=>{},}) => {
+    
+    return (
+        <Modal isVisible={visible} onBackButtonPress={()=> back()} 
+            onBackdropPress={()=> back()} >
+
+            <View style={{width: '100%', backgroundColor: '#fff', borderRadius: 4, padding: 10}}>
+
+                <Text style={{alignSelf:'center', fontSize:20}}>Who has access</Text>
+
+            </View>
+        </Modal>
+    )
+}
+
+const AccessContainer = ({report}) => {
+
+    const [visible, setVisible ] = useState(false);
+
+    return (
+        <>
+        {report && (
+            <TouchableOpacity style={[styles.row, styles.compContainer, {padding: 10, margin: 5,}]}
+                onPress={() => {setVisible(true)}}
+            >
+                <WhoHasAccessModal visible={visible} style={styles.modal} back={()=> setVisible(false)}/>
+
+                <Text style={{fontSize: 18,}}>Accessed by: </Text>
+                <Text style={{fontSize: 18,}}>{`${report?.user?.fullname?? ''}`}</Text>  
+
+            </TouchableOpacity>
+        )}
         </>
     )
 }
@@ -167,32 +211,21 @@ export const VerificationComponent = ({report, visible }) => {
 
 const LocationContainer = ({report}) => {
 
-    const [data, setData] = useState(null)
-
     const handleDirection = () => {
         const loc = { destination: {
-                latitude: data?.location.latitude,
-                longitude: data?.location.longitude,
+                latitude: report?.location.latitude,
+                longitude: report?.location.longitude,
             }
         }
         getDirections(loc);
     }
 
-    useEffect( () => {
-        (async () => {
-            if(report?.id){
-                const dat = await getRprt(report?.id)
-                if(dat) { setData(dat); }
-            }
-        })()
-    }, [report])
-
     return (
         <>
-        {data && (
+        {report.location && (
             <View style={[styles.row, styles.compContainer, {padding: 10, margin: 5,}]}>
-                <Text style={{fontSize: 18,}}>  Location : </Text>
-                <Text style={{fontSize: 18,}}>  {`${data?.brgyName?.brgy_name?? ''}`} </Text>
+                <Text style={{fontSize: 18,}}>Location : </Text>
+                <Text style={{fontSize: 18,}}>  {`${report?.brgyName?.brgy_name?? ''}`} </Text>
 
                 {report.location && (
                     <AntDesign name="arrowright" size={24} color="black"  onPress={()=> handleDirection() } />
@@ -204,7 +237,7 @@ const LocationContainer = ({report}) => {
 }
 
 
-const UserContainer = ({report, user}) => {
+const SenderContainer = ({report, user}) => {
 
     const onCallPress = () => { Linking.openURL(`tel:${report?.number}`) }
 
@@ -226,29 +259,22 @@ const UserContainer = ({report, user}) => {
 }
 
 
-export const AttachmentComponent = ({report}) => {
-
-    const [images, setImages] = useState(null)
-
-    useEffect( () => { (async () => {  
-        if(report?.attachments) {
-            let imgData = await fetchImage(report?.id)
-            if(imgData) setImages(imgData)
-        }
-    })() }, [])
+export const AttachmentComponent = ({attach}) => {
 
     return (
     <>
-        {images && (
+        {attach && (
 
-            <View style={[styles.compContainer, {padding: 10, margin: 5,}]}>
+            <View style={[styles.compContainer, {padding: 5, margin: 5,}]}>
                 <Text style={{fontSize: 16, marginBottom: 5}}>Attachments </Text>
 
                 <ScrollView horizontal style={{padding:5}}>
 
-                {images.map( obj => ( 
-                    <ImageCont fileUrl={obj.file_url} key={obj.file_url}/>
-                ) )}
+                    {attach.map( obj => (
+                        obj.file_url.includes('.mp4') ? 
+                        <MyVideoPlayer source={obj.file_url} key={`${obj.file_url}`} /> :  
+                        <ImageCont fileUrl={obj.file_url} key={obj.file_url}/>
+                    ) )}
 
                 </ScrollView>
             </View>
@@ -258,29 +284,54 @@ export const AttachmentComponent = ({report}) => {
 }
 
 
+const InvolvedCountComp = ({report}) => {
+
+    return (
+        <>
+            {report.involved_count && (
+
+                <View style={[styles.row, styles.compContainer, {padding: 10, margin: 5,}]}>
+                    <Text style={{fontSize: 18,}}>  Number of Involved : </Text>
+                    <Text style={{fontSize: 18,}}>  {`${report?.involved_count?? ''}`}</Text>
+                </View>
+            )}
+        </>
+    )
+}
+
 
 export default function ReportModal({id, onExit=()=>{}, visible, ...props}) {
     //const navigation = useNavigation()
   
     const [report, setReport] = useState(null)
     const [status, setStatus] = useState(null)
-
+    const [attachment, setAttachment] = useState(null)
 
     useEffect(()=> { 
+        // Fetch Report
         (async () => {
             if(id && visible){
                 const data = await getRprt(id)
-                if(data) { 
-                    setReport(data)
-                    setStatus(data.status) 
+                .catch(err => { return Alert.alert('Request Failed', `${err}`)})
+
+                //if(!data) return Alert.alert('Request Failed', 'Please try again later.')
+
+                if(data.attachments){
+                    let imgData = await fetchImage(id)
+                    .catch(err => { return Alert.alert('Request Failed', `${err}`)})
+
+                    if(imgData) setAttachment(imgData)
                 }
+
+                setReport(data) 
+                setStatus(data.status)
             }
         })()
     }, [id, visible])
 
    
-    useEffect( ()=> {
-        // Listen to database Updates
+    //Listen to database Updates
+    useEffect( () => {
         if(visible && id){
             const channelModal = supabase.channel('db-changes')
             .on('postgres_changes',
@@ -294,8 +345,8 @@ export default function ReportModal({id, onExit=()=>{}, visible, ...props}) {
 
 
   return (
+    <Modal isVisible={visible} style={styles.modal} onBackButtonPress={() => onExit()} >
 
-    <Modal isVisible={visible} style={styles.modal}>
         <View style={styles.container}>
 
         {report && ( 
@@ -310,12 +361,14 @@ export default function ReportModal({id, onExit=()=>{}, visible, ...props}) {
                 </View>
             
                 <ImageHeader type={report.type} report={report} /> 
-               
+
+                <InvolvedCountComp report={report} />
+
                 <LocationContainer report={report} />
 
-                <UserContainer report={report} user={props.user} />
+                <SenderContainer report={report} user={props.user} />
 
-                <AttachmentComponent report={report} />    
+                <AttachmentComponent report={report} attach={attachment}/>
 
                 {props.user.role === 2 && report.sender_id !== props.user.user_id && (
                     <VerificationComponent report={report} user={props.user}/>
@@ -323,16 +376,18 @@ export default function ReportModal({id, onExit=()=>{}, visible, ...props}) {
             </>
             )}
 
-            {!report && (
-                <View style={{padding: 10, justifyContent: 'center', alignItems: 'center',}}>
-                    <ActivityIndicator size="large" color="#3399ff" />
-                </View>
-            )}
+        {!report && (
+            <View style={{padding: 10, justifyContent: 'center', alignItems: 'center',}}>
+                <ActivityIndicator size="large" color="#3399ff" />
+            </View>
+        )}
 
         </View> 
     </Modal>
   );
 }
+
+
 
 const styles = StyleSheet.create({
     modal: {
@@ -369,7 +424,17 @@ const styles = StyleSheet.create({
     compContainer: {
         backgroundColor: '#f2f2f2', 
         borderRadius: 3, 
-        borderWidth: 0.3, 
+        borderWidth: 0.5, 
         borderColor: '#9999',
+    },
+
+    videoPreview: {
+        width: 100, 
+        height: 120, 
+        backgroundColor: '#9999',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 5,
+        marginHorizontal: 5
     }
 });

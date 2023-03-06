@@ -19,7 +19,7 @@
     </intent>
   </queries>
   <application android:name=".MainApplication" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:allowBackup="false" android:theme="@style/AppTheme" android:usesCleartextTraffic="true">
-    <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyB1WQNtHLex4MZ2Ln6Cl1mx31UGGCt1b4Y"/>
+    <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyA_xCPoXGzXTOB9lR3F8Vi3h0b4c4NcShQ"/>
     <meta-data android:name="expo.modules.updates.EXPO_SDK_VERSION" android:value="YOUR-APP-SDK-VERSION-HERE"/>
     <meta-data android:name="expo.modules.updates.EXPO_UPDATE_URL" android:value="YOUR-APP-URL-HERE"/>
     <activity android:name=".MainActivity" android:label="@string/app_name" android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:theme="@style/Theme.App.SplashScreen" android:exported="true">

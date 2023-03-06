@@ -1,62 +1,64 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TextInput, Alert} from 'react-native';
-//import { useNavigation } from '@react-navigation/native';
-import { getRprt } from '../queries/fetch-reports';
-import { queryClient } from '../lib/global-utils';
+import { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Loading } from '../components/loading';
 import ChatComponent from '../components/chatcomponent'
 import ReportModal from '../routes/report-modal';
 
-//import supabase from '../lib/supabase';
-//import { FontAwesome, Ionicons } from '@expo/vector-icons';
+////////////////////////////////////////////////////////
+
+import getProfile from '../queries/fetch-profile';
+import { getRprt } from '../queries/fetch-reports';
+
 
 
 export default function ReportDetails({navigation, route}) {
 
+    const { data: user } = getProfile();
     const [report, setReport] = useState(null)
-    const [user, setUser] = useState(null)
+    const [modal, setModal] = useState(false)
 
-    const [modalState, setModalState] = useState(false)
-
-      useEffect( ()=> {
-        (async () => {
-            const data = await getRprt(route?.params?.reportId)
-            const profile = await queryClient.getQueryData({queryKey: ['userProfile']})
-
-            if(profile) { setUser(profile)}
-            if(data){ 
-                setReport(data)
-                navigation.setOptions({ headerTitle: `${data.repType.type_name} @ ${data.brgyName.brgy_name}`})
-            }
-        })()
-      }, [])
+    useEffect( ()=> {
+    (async () => {
+        const data = await getRprt(route?.params?.reportId)
+        .catch(err => { return Alert.alert('Request failed', `${err}`) })
+    
+        if(data){ 
+            setReport(data)
+            navigation.setOptions({ headerTitle: `${data.repType.type_name} @ ${data.brgyName.brgy_name}`})
+        }
+    })()
+    }, [])
 
       
   return(
     <View style={styles.container}>
+        {!report && ( <Loading/> ) }
 
-    {!report && ( <Loading/> ) }
+        {report && (
+            <>
+                <ReportModal 
+                    visible={modal} 
+                    id={report?.id} 
+                    onExit={()=> setModal(false)} 
+                    user={user}
+                />
 
-    {report && (
-    <>
-        <ReportModal visible={modalState} id={report?.id} onExit={()=> setModalState(false)}
-            user={user}
-        />
+                <TouchableOpacity 
+                    style={styles.headerButton} 
+                    onPress={()=> setModal(true)}
+                >
+                    <Text style={{fontSize: 18}}> View Details</Text>
+                </TouchableOpacity>
 
-        <TouchableOpacity style={styles.headerButton} onPress={()=> setModalState(true)}>
-            <Text style={{fontSize: 18}}> View Details</Text>
-        </TouchableOpacity>
+                <ChatComponent 
+                    user={user} 
+                    report={report} 
+                    attachments = {report?.attachments}
+                    silent={report?.type === 6 ? true : null}
+                />
 
-        <ChatComponent 
-            user={user} 
-            report={report} 
-            attachments = {report?.attachments}
-            silent={report?.type === 6 ? true : null}
-        />
-
-    </>
-    )}
-
+            </>
+        )}
     </View>
   )
 }

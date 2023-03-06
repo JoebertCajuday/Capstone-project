@@ -6,32 +6,27 @@ import * as Location from 'expo-location';
 import { Loading } from './loading';
 
 
-export default function Locator({onChangeLocation = () => {}}) {
+export default function Locator({onChangeLocation=()=>{}, isActive}) {
 
   const [markerLoc, setMarkerLoc] = useState({})
-
   const mapViewRef = useRef()
-
-  async function checkPermission(){
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    let networkAccuracy = await Location.enableNetworkProviderAsync();
-
-    if(status !== 'granted'){
-      return Alert.alert("Permission required", 
-      "This app needs access to your location. Please enable it under Phone Settings / Applications / Permissions / locate")
-    }
-    else getCoord();
-  }
 
   // get coordinates for marker
   const setMarker = async () => {
     let coordinates = await Location.watchPositionAsync(
-      { accuracy: Location.Accuracy.High, distanceInterval: 10 },
+      { accuracy: Location.Accuracy.BestForNavigation, distanceInterval: 10, mayShowUserSettingsDialog: true },
       location => { 
-        setMarkerLoc({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude
-        }) 
+
+        mapViewRef.current = {
+          region : {
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude, 
+            latitudeDelta: 0.002,
+            longitudeDelta: 0.0001,
+          }
+        }
+
+        setMarkerLoc({ latitude: location.coords.latitude, longitude: location.coords.longitude })
         
         const loc_obj = {
           latitude: location.coords.latitude,
@@ -43,29 +38,34 @@ export default function Locator({onChangeLocation = () => {}}) {
       }
     )
   }
+  
 
-
-  // get initial map coordinates
-  const getCoord = async () => {
-    let coordinates = await Location.getCurrentPositionAsync(
-      { accuracy: Location.Accuracy.High, distanceInterval: 10 });
-
-    if(coordinates) { 
-
-      mapViewRef.current = {
-        region : {
-          latitude: coordinates.coords.latitude,
-          longitude: coordinates.coords.longitude, 
-          latitudeDelta: 0.002,
-          longitudeDelta: 0.0001,
+  useEffect( ()=> {
+    (async () => {
+      
+      let { status } = await Location.requestForegroundPermissionsAsync();    
+        if(status !== 'granted'){
+          return Alert.alert("Permission required", 
+          "This app needs access to your location. Please enable it under Phone Settings / Applications / Permissions / locate")
         }
-      }
-
-      setMarker();
-    }
-  }
-
-  useEffect( () => { checkPermission() }, []);
+        
+        let coordinates = await Location.getCurrentPositionAsync(
+          { accuracy: Location.Accuracy.High, distanceInterval: 10 });
+    
+        if(coordinates) { 
+    
+          mapViewRef.current = {
+            region : {
+              latitude: coordinates.coords.latitude,
+              longitude: coordinates.coords.longitude, 
+              latitudeDelta: 0.002,
+              longitudeDelta: 0.0001,
+            }
+          }
+        }
+        setMarker();
+    })()
+  }, [])
 
 
   return (
@@ -76,7 +76,8 @@ export default function Locator({onChangeLocation = () => {}}) {
       { markerLoc.latitude && (
         <View style={styles.container}>
         
-          <MapView provider={PROVIDER_GOOGLE}   style={styles.map}
+          <MapView provider={PROVIDER_GOOGLE}   
+            style={styles.map}
             region={mapViewRef.current.region} >
 
             <Marker coordinate={{latitude: markerLoc.latitude, longitude: markerLoc.longitude}} />

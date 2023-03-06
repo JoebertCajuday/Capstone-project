@@ -1,39 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, 
-  ScrollView, Keyboard, Alert } from 'react-native';
-//import * as SecureStore from 'expo-secure-store';
-import getBrgy, { getDept } from '../queries/fetch-brgy';
-import supabase from '../lib/supabase';
-
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Keyboard, Alert } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import SelectList from 'react-native-dropdown-select-list';
-import LoadingScreen, { Loading } from './loading';
-
 import CustomInput from './custominput';
 import IdPicker from './idProcessor';
 import TermsConditions from './termsConditions';
 
+import LoadingScreen, { Loading } from './loading';
+
+import getBrgy, { getDept } from '../queries/fetch-brgy';
+import supabase from '../lib/supabase';
+
 import { globalStyles } from './globalstyle';
-import upload_id, { fetchImgUrl } from '../queries/image-upload';
+import upload_id from '../queries/image-upload';
 import insertToProfile, { insertToResponders, insertToUnames } from '../queries/post-user';
-import { queryClient } from '../lib/global-utils';
 
 
 export default function SignUp() {
 
-  /** Fetch
-   * Barangays
-   * Departments
-   * 
-   * Fill up => register to auth => upload id => insert to respo => insert name => insert profile
-   */
-
+  const { data: brgy } = getBrgy();
   const { data: departments, isSuccess, isLoading } = getDept()
-
-  const [brgy, setBrgy] = useState([]);
-  const [dept, setDept] = useState([])
-
-  const [isReady, setIsReady] = useState(false)
 
   const [responder, setResponder] = useState(false); // Toggler Value
   const [modal, setModal] = useState(false); // For Terms and Condition
@@ -61,49 +47,41 @@ export default function SignUp() {
   const showTerms = () => setModal(true)
 
 
-  const getBarangays = async () => {
-    const brgys = await queryClient.getQueryData({queryKey: ['getBrgys']})
-    if(brgys){ brgys.map( obj => setBrgy(name => [...name, {key: obj.id, value: obj.brgy_name}])) }
-
-    setIsReady(true)
-  }
-
-
-  useEffect( () => {
-    (async ()=> {
-      if(departments){ 
-        departments.map(obj => setDept(name => [...name, {key: obj.id, value: obj.dept_name}]))
-        getBarangays() 
-      } 
-    })()
-  }, [departments]) 
-
-
   const insert = async (user_id) => { // Insert data to profile
 
     let responderRef;
     
     if(inputs.isResponder){  // insert to responders
       let frontImage = await upload_id(inputs.idFront, user_id)
-      let backImage = await upload_id(inputs.idBack, user_id)
+      .catch(err => { return Alert.alert('Failed', `${err}`)})
 
-      if(!frontImage || !backImage){ setLoading(false) 
+      let backImage = await upload_id(inputs.idBack, user_id)
+      .catch(err => { return Alert.alert('Failed', `${err}`)})
+
+      if(!frontImage || !backImage){ 
+        setLoading(false) 
         return Alert.alert('Failed to upload Image', 'Please try again later')
       }
+
       else{
-        let frontImgUrl = await fetchImgUrl(frontImage.path)
-        let backImgUrl = await fetchImgUrl(frontImage.path)
+        //let frontImgUrl = await fetchImgUrl(frontImage.path)
+        //let backImgUrl = await fetchImgUrl(frontImage.path)
 
         const responderObj = {
           user_id:      user_id, 
           department:   inputs.department?? null,
-          front_id:     frontImgUrl?.publicUrl?? null,
-          back_id:      backImgUrl?.publicUrl?? null,
+          front_id:     frontImage?? null,
+          back_id:      backImage?? null,
         }
 
         let responderResult = await insertToResponders(responderObj)
+        .catch(err => { 
+          setLoading(false)
+          return Alert.alert('Failed', `Please try again later. \n ${err}`)
+        })
 
-        if(responderResult?.error){setLoading(false)
+        if(responderResult?.error){
+          setLoading(false)
           return Alert.alert('Failed to create profile', 'Please try again later')
         }
 
@@ -122,6 +100,11 @@ export default function SignUp() {
     }
 
     let usernameResult = await insertToUnames(usernameObj)
+    .catch(err => { 
+      setLoading(false)
+      return Alert.alert('Failed', `Please try again later. \n ${err}`)
+    })
+
     if(usernameResult?.error){
       setLoading(false)
       return Alert.alert('Failed to create profile', `Please try again later`)
@@ -139,6 +122,11 @@ export default function SignUp() {
     }
 
     let userprofileResult = await insertToProfile(userprofileObj)
+    .catch(err => { 
+      setLoading(false)
+      return Alert.alert('Failed', `Please try again later. \n ${err}`)
+    })
+    
     if(userprofileResult?.error){
       setLoading(false)
       return Alert.alert('Failed to create profile', `Please try again later`)
@@ -167,7 +155,7 @@ export default function SignUp() {
     insert(data.user.id);
   }
 
-  const register = async () => {
+  const register = async () => { // chech if mobile number is still available
     
     setModal(false) 
     setLoading(true)
@@ -194,7 +182,7 @@ export default function SignUp() {
   }
 
 
-  function validate() {
+  function validate() { // check if all inputs are filled up
     Keyboard.dismiss();
     let isValid = true
 
@@ -280,11 +268,10 @@ export default function SignUp() {
   return (
     <View style={[styles.container, {flex:1}]}>
 
-      {!isReady && ( <Loading />)}
+      {!isSuccess && ( <Loading />)}
 
-      { isReady && ( <>
-        <TermsConditions  visible={modal}     toggleModal={val => setModal(val)}     
-          agreed={() => register() } />
+      { isSuccess && ( <>
+        <TermsConditions  visible={modal} toggleModal={val => setModal(val)} agreed={() => register() } />
 
         <LoadingScreen visible={loading}/>
 
@@ -365,7 +352,7 @@ export default function SignUp() {
                 <SelectList 
                   setSelected={text => setInputs(prevState =>({...prevState, ['department']: text}))} 
                   onSelect={() => { handleError(null, 'department') }}
-                  data={dept}   placeholder='Select Department'
+                  data={departments}   placeholder='Select Department'
                   boxStyles={[styles.box_style, { borderColor: errors['department'] ? '#ff6666' : '#9999', }]}
                 />
               </View>

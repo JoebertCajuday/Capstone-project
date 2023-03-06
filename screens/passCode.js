@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image} from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import LoadingScreen from '../components/loading';
 import { Entypo, Octicons, Feather } from '@expo/vector-icons';
 

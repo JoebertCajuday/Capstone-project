@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import ReportHeader from '../components/reportheader';
 import ImageAttachment from '../components/imageAttachments';
 import ProblemDescription from '../components/probDescription';
 import LoadingScreen, { Loading } from '../components/loading';
 
+/////////////////////////////////////////////////////
+
 import submit_report from '../queries/submit-report';
-import { queryClient } from '../lib/global-utils';
+import getProfile from '../queries/fetch-profile';
 
 
 export default function Other({ navigation, route}) {
@@ -15,7 +17,8 @@ export default function Other({ navigation, route}) {
   const barangay = route.params?.barangay
   const brgyName = route.params.brgyName
 
-  const [user, setUser] = useState(null)
+  const { data: user } = getProfile();
+
   const [report, setReport] = useState(null)
 
   const [loading, setLoading] = useState(false)
@@ -25,11 +28,11 @@ export default function Other({ navigation, route}) {
   const [attachments, setAttach] = useState()
 
 
-  const [button, setButton] = useState(false); // Button for sending
+  //const [button, setButton] = useState(false); // Button for sending
 
   // Submit report
   const submit = async () => {
-    setButton(true)
+    //setButton(true)
     
     // Accident type = 4
     const object = {
@@ -44,12 +47,17 @@ export default function Other({ navigation, route}) {
     }
 
     let result = await submit_report(object)
+    .catch(err => { 
+      return Alert.alert('Request failed', 
+      `Please try again later or check your account status \n ${err}`)
+    })
     
-    if(result?.error){ 
-      setLoading(false)
-      return Alert.alert('Request failed', 'Please try again later or check your account status') 
-    }
-    else { setReport(result) }
+    //if(result?.error){ 
+      //setLoading(false)
+      //return Alert.alert('Request failed', 'Please try again later or check your account status') 
+    //}
+    //else { 
+    setReport(result) //}
   }
 
 
@@ -58,12 +66,6 @@ export default function Other({ navigation, route}) {
     navigation.navigate('Home', {id: report.id}) 
   }
 
-  useEffect(()=> {
-    (async () => {
-      const profile = await queryClient.getQueryData({queryKey: ['userProfile']})
-      if(profile) { setUser(profile)}
-    })()
-  }, [])
 
   useEffect(() => { if(route.params?.submit){ submit()}}, [route.params?.submit])
 
@@ -90,10 +92,9 @@ export default function Other({ navigation, route}) {
           </ScrollView>
 
           <View style={styles.btnContainer} >
-            <TouchableOpacity disabled={button}
-              style={[styles.submitBtn, {opacity: button ? 0.3 : 1}]}  
-              onPress={()=>navigation.navigate('PinCode', 
-              { routeBack: 'Other', location: location, barangay: barangay})}>
+            <TouchableOpacity disabled={route?.params?.submit?? false}
+              style={[styles.submitBtn, {opacity: route?.params?.submit ? 0.3 : 1}]}  
+              onPress={()=>navigation.navigate('PinCode', { routeBack: 'Other', location: location, barangay: barangay})}>
                 
               <Text style={{fontSize: 20, fontWeight: 'bold', color: '#fff'}}>Submit Report</Text>
             </TouchableOpacity>

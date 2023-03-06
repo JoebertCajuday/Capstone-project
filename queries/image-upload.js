@@ -3,51 +3,56 @@ import supabase from '../lib/supabase';
 import { decode } from 'base64-arraybuffer';
 //import { ATTACHMENTS_URL } from '@env'
 
-const splitTest = function (str) {
-  return str.split('\\').pop().split('/').pop();
-}
+const splitTest = function (str) { return str.split('\\').pop().split('/').pop() }
+
 
 export default async function upload_id(obj, folder) {
+    try{
+      const fileName = splitTest(obj.uri);
 
+      const { data, error } = await supabase.storage.from('respondersid')
+      .upload(`${folder}/${fileName}`, decode(obj.base64), {
+        contentType: 'image/png',
+        cacheControl: '3600',
+        upsert: false
+      })
+
+      if(error) { throw new Error(error.message)}
+
+      const { data: url } = await supabase.storage.from('respondersid')
+      .getPublicUrl(`${data.path}`)
+
+      return url.publicUrl
+    }
+    catch(err){ throw new Error(err) } 
+}
+
+
+
+export const upload_image = async (obj, folder, bucket) => {
+  try{
     const fileName = await splitTest(obj.uri);
+    const key = process.env.ATTACHMENTS_URL
 
-    const { data, error } = await supabase.storage
-    .from('respondersid')
+    const { data, error } = await supabase.storage.from(`${bucket}`)
     .upload(`${folder}/${fileName}`, decode(obj.base64), {
       contentType: 'image/png',
       cacheControl: '3600',
       upsert: false
     })
 
-    if(error) { return {error}}
-
-    return data
+    if(error) { throw new Error(error.message) }
+    return url = `${key}${data.path}`
+  }
+  catch(err){ throw new Error(err) }
 }
 
 
-export const upload_image = async (obj, folder, bucket) => {
-
-  const fileName = await splitTest(obj.uri);
-  const key = process.env.ATTACHMENTS_URL
-
-  const { data, error } = await supabase.storage
-  .from(`${bucket}`)
-  .upload(`${folder}/${fileName}`, decode(obj.base64), {
-    contentType: 'image/png',
-    cacheControl: '3600',
-    upsert: false
-  })
-
-  if(error) { return { error }}
-
-  return url = `${key}${data.path}`
-}
 
 
 export const fetchImage = async (reportId) => {
-
-  const { data, error } = await supabase
-    .from('attachments')
+  try{
+    const { data, error } = await supabase.from('attachments')
     .select('*')
     .eq('report_id', reportId)
 
@@ -56,13 +61,7 @@ export const fetchImage = async (reportId) => {
 
     // return images array
     return data
+  }
+  catch(err){ throw new Error(err) }
 }
 
-
-/*export const fetchImgUrl = async (path) => {
-
-  const key = ATTACHMENTS_URL
-  const url = `${key}${path}`
-
-  return url
-}*/

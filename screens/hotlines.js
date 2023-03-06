@@ -1,32 +1,38 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Alert, Image, Linking} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { queryClient } from '../lib/global-utils';
-import { hotlines } from '../queries/fetch-profile';
+////////////////////////////////////////////////////////////////
+
+import getProfile, { hotlines } from '../queries/fetch-profile';
 import { Loading } from '../components/loading';
+
 
 const HotButton = ({onSelect=()=> {}, selectState, ...props}) => {
 
   const dataRef = useRef(null);
+  //const { data: hotline, isSuccess, isError } = getHotlines(props.brgy, true);
 
   useEffect( ()=> {
     (async ()=> {
+      let alertVar = false
+
       if(props.brgy){
         const result = await hotlines(props.brgy, true)
+          .catch(err => { alertVar = err })
 
         if(result){ dataRef.current = result.number }
-
-        else { return Alert.alert('Failed to fetch hotlines', 'Please try again later')}
+        //else { return Alert.alert('Failed to fetch hotlines', 'Please try again later')}
       }
-
       else {
         const result = await hotlines(props.dept)
+          .catch(err => { alertVar = err })
 
         if(result){ dataRef.current = result.number }
-
-        else { return Alert.alert('Failed to fetch hotlines', 'Please try again later')}
+        //else { return Alert.alert('Failed to fetch hotlines', 'Please try again later')}
       }
+
+      if(alertVar){ return Alert.alert('Failed to fetch', 'Please try again later or check your internet connection') }
     })()
   }, [])
 
@@ -42,47 +48,37 @@ const HotButton = ({onSelect=()=> {}, selectState, ...props}) => {
 }
 
 
-export default function EmergencyHotlines( { navigation } ) {
+export default function EmergencyHotlines({ navigation }) {
 
-    const [user, setUser] = useState(null)
-    const [selected, setSelected] = useState(null)
-    const [number, setNumber] = useState(null)
+  const { data: user } = getProfile();
 
-    const selectResponse = async (value) => {
-      if(selected === value.id) {
-        setSelected(null)
-        setNumber(null)
-      }
-      else {
-        setSelected(value.id)
-        setNumber(value.number)
-      }
+  const [selected, setSelected] = useState(null)
+  const [number, setNumber] = useState(null)
+
+  const selectResponse = async (value) => {
+    if(selected === value.id) {
+      setSelected(null)
+      setNumber(null)
     }
-
-    const initiateCall = () => {
-      // Open dial pad
-      if(number) { Linking.openURL(`tel:${number}`) }
-
-      else return Alert.alert('Resource Error', 'Please try again later')
+    else {
+      setSelected(value.id)
+      setNumber(value.number)
     }
+  }
 
-    useEffect( ()=> {
-      (async ()=> {
-        const profile = await queryClient.getQueryData({queryKey: ['userProfile']})
-
-        if(profile) setUser(profile)
-      })()
-    }, [])
+  const initiateCall = () => {
+    // Open dial pad
+    if(number) { Linking.openURL(`tel:${number}`) }
+    else return Alert.alert('Resource Error', 'Please try again later')
+  }
 
 
   return (
     <View style={styles.container}>
-
       {!user && ( <Loading />)}
 
       {user && (
         <>
-
           <View style={styles.rowContainer}>
 
             <HotButton  source={require('../assets/city-hall.png')}

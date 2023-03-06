@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, } from 'react-native';
-//import AsyncStorage from '@react-native-async-storage/async-storage';
-//import Modal from 'react-native-modal';
 import Locator from '../components/locator';
 import ReportModal from './report-modal';
+import SelectList from 'react-native-dropdown-select-list';
 import { Loading } from '../components/loading';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-//import supabase from '../lib/supabase';
+/////////////////////////////////////////////////////////////////////
+
 import getProfile from '../queries/fetch-profile';
-import { queryClient } from '../lib/global-utils';
-import SelectList from 'react-native-dropdown-select-list'
-import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import getBrgy from '../queries/fetch-brgy';
+
 
 
 const ImageWrapper = (props) => {
@@ -23,46 +23,41 @@ const ImageWrapper = (props) => {
 
 const BarangaySelect = ({barangay, onSlct = () => {}, ...props}) => {
 
-  const [brgyList, setBrgyList] = useState(null)
   const [brgy, setBrgy] = useState(null)
+  const { data: brgys, isSuccess } = getBrgy();
 
   useEffect(() => {
-    (async () => {
-      const brgys = await queryClient.getQueryData({queryKey: ['getBrgys']})
-      if(brgys){
-        setBrgyList([])
-
-        brgys.map( obj => {
-          if(obj.id === barangay) { 
-            setBrgy({key: obj.id, value: obj.brgy_name}) 
-            onSlct({key: obj.id, value: obj.brgy_name})
-          }
-          setBrgyList(name => [...name, {key: obj.id, value: obj.brgy_name}])
-        })
-      }
-    })()
-  }, [])
+    if(brgys){
+      brgys.map( obj => { 
+        if(obj.key === barangay) { 
+          setBrgy(obj) 
+          onSlct(obj)
+        }
+      })
+    }
+  }, [isSuccess])
 
   const onSelectHandler = (id) => {
-    if(id === brgyList[id-1].key){ onSlct(brgyList[id-1]) }
+    if(id === brgys[id-1].key) { onSlct(brgys[id-1]) }
 
-    else{ brgyList.map( obj => { if(obj.key === id) onSlct(obj) }) }
+    else{ brgys.map( obj => { if(obj.key === id) onSlct(obj) }) }
   }
 
   return (
     <>
-      {brgy && (
+      {!isSuccess && (<Loading/>)}
+      
+      {isSuccess && (
         <SelectList
           setSelected={ val => setBrgy(val)} 
-          placeholder={`${brgy.value?? 'Loading'}`}
+          placeholder={`${brgy ? brgy.value : 'Loading'}`}
           onSelect={ () => onSelectHandler(brgy) }
-          data={brgyList} 
+          data={brgys} 
         />
       )}
     </>
   )
 }
-
 
 
 
@@ -98,10 +93,7 @@ export default function Home( {navigation, route} ) {// Homescreen
     )}
   const Silent = () => { // Silent Button
     return(
-      <TouchableOpacity style={styles.buttons} onPress={() => pressHandler('Silent')}
-        //onPress={()=> navigation.navigate('PinCode', {routeBack: 'Silent', location: location})}
-        >
-
+      <TouchableOpacity style={styles.buttons} onPress={() => pressHandler('Silent')} >
         <ImageWrapper ImageUri={require('../assets/alert.png')} />
         <Text style={styles.txt}>Silent</Text>
       </TouchableOpacity>
@@ -143,12 +135,12 @@ export default function Home( {navigation, route} ) {// Homescreen
 
   const exitModal = () => setModalState(false)
 
-  const { data: profile, isSuccess, isLoading } = getProfile();
+  const { data: profile, isSuccess, isError } = getProfile();
 
   const brgyName = useRef('');
   const barangay = useRef(null);
 
-  const [location, setLocation] = useState()
+  const [location, setLocation] = useState(null)
 
 
   // States for Report Modal
@@ -162,16 +154,10 @@ export default function Home( {navigation, route} ) {// Homescreen
   }
 
 
-  /*useEffect( ()=> {
-    if(route.params?.id){
-      setModalId(route.params.id)
-      setModalState(true)
-    }
-  }, [route.params?.id])*/
-
-
-  // Set barangay state based on profile
-  useEffect( ()=> { if(profile){ barangay.current = profile.barangay }}, [profile])
+  // Set barangay state ref based on profile
+  useEffect( ()=> { 
+    if(profile){ barangay.current = profile.barangay }
+  }, [profile])
 
 
   // Listen to inserts
@@ -202,11 +188,10 @@ export default function Home( {navigation, route} ) {// Homescreen
   return (
     <View style={styles.container}>
 
-      {isLoading && ( <Loading /> )}
-
+      {!isSuccess && ( <Loading /> )}
       {isSuccess && (
         <>
-          <ReportModal visible={modalState} id={modalId} onExit={()=> exitModal()} user={profile} />
+          <ReportModal visible={modalState} id={modalId} onExit={() => exitModal()} user={profile} />
 
           <View style={{flex:4}} >
     
@@ -234,6 +219,12 @@ export default function Home( {navigation, route} ) {// Homescreen
           </View>
         </> 
       )}    
+
+      {isError && (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}> 
+          <Text style={{fontSize: 20,}}>Something went wrong. Please make sure you are connected to the internet and try again</Text>
+        </View>
+      )}
     </View>
   );
 }

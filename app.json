@@ -13,7 +13,11 @@
       "eas": {
         "projectId": "dd73a0e5-c8a5-46b6-877f-d5839b52691c"
       }
-    }
+    },
+    "splash": {
+       "image": "./assets/Slide1.png",
+       "resizeMode": "contain"
+      }
   },
   "name": "capstone-proj"
 }

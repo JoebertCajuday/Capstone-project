@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert, Image} from 'react-native';
+//import { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Alert, Image} from 'react-native';
 
 import axios from 'axios';
 import { Loading } from '../components/loading';

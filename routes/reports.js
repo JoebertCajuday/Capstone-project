@@ -69,11 +69,9 @@ export default function Reports({navigation, route}) {
 
   // subscribe to all realtime events
   useEffect( () => {
-      
+
   const reports = supabase.channel('custom-all-channel')
-  .on(
-    'postgres_changes',
-    { event: '*', schema: 'public', table: 'reports' },
+  .on('postgres_changes',{ event: '*', schema: 'public', table: 'reports' },
     (payload) => {
       //if(payload.eventType === 'INSERT'){ //setData(name => [...name, payload.new])
         //setData(name => [payload.new, ...name])

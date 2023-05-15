@@ -155,19 +155,18 @@ export default function Home( {navigation, route} ) {// Homescreen
 
 
   // Set barangay state ref based on profile
-  useEffect( ()=> { 
+  useEffect( () => { 
     if(profile){ barangay.current = profile.barangay }
   }, [profile])
 
 
   // Listen to inserts
-  useEffect( ()=> {
-
+  useEffect( () => {
     const reports = supabase.channel('custom-insert-channel')
-    .on(
-      'postgres_changes', 
-      { event: 'INSERT', schema: 'public', table: 'reports' },
-      (payload) => {
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'reports' },
+    (payload) => {
+          //if(payload.new.sender_id === profile?.user_id){ return }
+
           setModalId(payload.new.id)
           if(payload.new.type !== 6) { setModalState(true) }
           
@@ -177,11 +176,16 @@ export default function Home( {navigation, route} ) {// Homescreen
       }
     )
     .subscribe()
-
     return () => { supabase.removeChannel(reports) }
 
   }, [])
-  
+
+/*
+  useEffect(() => { if(route.params?.id){
+    setModalId(route?.params?.id)
+    setModalState(true)
+  }}, [route.params?.id])
+*/
 
 
 /// Home return component

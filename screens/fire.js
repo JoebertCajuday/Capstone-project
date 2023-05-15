@@ -13,7 +13,7 @@ import submit_report from '../queries/submit-report';
 import getProfile from '../queries/fetch-profile';
 
 
-export default function Fire( { navigation, route } ) {
+export default function Fire({ navigation, route }) {
   const location = route.params?.location
   const barangay = route.params?.barangay
   const brgyName = route.params.brgyName
@@ -26,7 +26,7 @@ export default function Fire( { navigation, route } ) {
   // states for inputs
   const [reqState, setReqState] = useState(false)
   const [message, setMessage] = useState(null)
-  const [attachments, setAttach] = useState(null)
+  //const [attachments, setAttach] = useState(null)
 
   //const [button, setButton] = useState(false); // to disable button after send
 
@@ -42,7 +42,7 @@ export default function Fire( { navigation, route } ) {
       location:     location?? null,
       assistance:   reqState,
       message:      message,
-      attachments:  attachments,
+      attachments:  true,
       brgy:         barangay,
       number:       user?.number,
     }
@@ -62,7 +62,7 @@ export default function Fire( { navigation, route } ) {
   }
 
 
-  const navigateToHome = () => { navigation.navigate('Home') }
+  //const navigateToHome = () => { navigation.navigate('Home', {report})}
 
 
   /* Fetch profile
@@ -72,6 +72,9 @@ export default function Fire( { navigation, route } ) {
       if(profile) { setUser(profile)}
     })()
   }, [])*/
+
+
+  // Send -> Enter Pin -> Upload -> upload pics -> save to db.
   
 
   // submit Report after successful passcode entry
@@ -94,7 +97,9 @@ export default function Fire( { navigation, route } ) {
 
             <OptionalMessage onChange={ text => setMessage(text) }/>
 
-            <ImageAttachment onSubmit={() => navigateToHome()} report={report} onAttach={ val => setAttach(val)}/>
+            <ImageAttachment //onSubmit={() => navigateToHome()} 
+            report={report} //onAttach={ val => setAttach(val)}
+            />
 
           </ScrollView>
 

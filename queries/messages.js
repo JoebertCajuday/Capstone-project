@@ -19,7 +19,7 @@ export const pushMessage = async (obj) => {
 export const loadMessage = async (id) => {
     try{
         const { data, error } = await supabase.from('report_messages')
-        .select('*, username:usernames(*)')
+        .select('*, username:usernames(*), designation: role(*)')
         .eq('report_id', id)
 
         if(error) { throw new Error(error.message) }

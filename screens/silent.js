@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { StyleSheet, View, Alert } from 'react-native';
 import ReportHeader from '../components/reportheader';
-import ChatComponent from '../components/chatcomponent'
+import ChatComponent from '../chat/chatcomponent'
 import { Loading } from '../components/loading';
 
 ////////////////////////////////////////////////////

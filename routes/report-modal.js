@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ActivityIndicator, Image, 
-    TouchableOpacity, ScrollView, Alert, Linking} from 'react-native';
-
-///////////////////////////////////////////////////////////
+    TouchableOpacity, ScrollView, Alert, Linking } from 'react-native';
 
 import Modal from "react-native-modal";
 //import SelectList from 'react-native-dropdown-select-list';
 import LoadingScreen from '../components/loading';
 import getDirections from 'react-native-google-maps-directions';
 import ImageViewer from '../components/image-viewer';
-import VideoPlayerMe, { MyVideoPlayer } from '../components/video-component';
+import { MyVideoPlayer } from '../components/video-component';
 
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { getRprt, updateReport } from '../queries/fetch-reports';
@@ -17,11 +15,9 @@ import { fetchImage } from '../queries/image-upload';
 import supabase from '../lib/supabase';
 
 
-
 export const ImageCont = (props) => {
     
     const [openViewer, setOpenViewer] = useState(false)
-
     return (
     <>
         <TouchableOpacity style={{marginHorizontal: 5}} onPress={()=> setOpenViewer(true)}>
@@ -56,7 +52,8 @@ const VerifModal = ({visible, initState, exitFunc=()=>{}, reportId}) => {
             let { data: report_status, error } = await supabase.from('report_status')
             .select('*')
             
-            if(error) return
+            if(error) return;
+
             setOptions(report_status)
         })()
     }, [])
@@ -76,7 +73,6 @@ const VerifModal = ({visible, initState, exitFunc=()=>{}, reportId}) => {
                     Update Report State </Text>
             </View>
 
-            
             <View style={[styles.compContainer, {padding: 5, padding: 10,}]}>
                 
                 {options && options.map(obj => {
@@ -260,7 +256,6 @@ const SenderContainer = ({report, user}) => {
 
 
 export const AttachmentComponent = ({attach}) => {
-
     return (
     <>
         {attach && (
@@ -314,13 +309,11 @@ export default function ReportModal({id, onExit=()=>{}, visible, ...props}) {
                 const data = await getRprt(id)
                 .catch(err => { return Alert.alert('Request Failed', `${err}`)})
 
-                //if(!data) return Alert.alert('Request Failed', 'Please try again later.')
-
                 if(data.attachments){
                     let imgData = await fetchImage(id)
                     .catch(err => { return Alert.alert('Request Failed', `${err}`)})
 
-                    if(imgData) setAttachment(imgData)
+                    if(imgData[0]) setAttachment(imgData)
                 }
 
                 setReport(data) 

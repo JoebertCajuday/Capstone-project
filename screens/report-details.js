@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Loading } from '../components/loading';
-import ChatComponent from '../components/chatcomponent'
+import ChatComponent from '../chat/chatcomponent'
 import ReportModal from '../routes/report-modal';
 
 ////////////////////////////////////////////////////////
@@ -43,8 +43,7 @@ export default function ReportDetails({navigation, route}) {
                     user={user}
                 />
 
-                <TouchableOpacity 
-                    style={styles.headerButton} 
+                <TouchableOpacity style={styles.headerButton} 
                     onPress={()=> setModal(true)}
                 >
                     <Text style={{fontSize: 18}}> View Details</Text>

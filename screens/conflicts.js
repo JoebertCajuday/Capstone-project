@@ -34,15 +34,13 @@ export default function Conflicts({ navigation, route }) {
 
   
   const submit = async () => {
-    //setButton(true)
-
     // Accident type = 3
     const object = {
       sender_id:      user?.user_id,
       type:           3,
       location:       location?? null,
       assistance:     reqState,
-      attachments:    attachments,
+      attachments:    true,
       involved_count: count,
       brgy:           barangay,
       number:         user?.number,
@@ -86,7 +84,9 @@ export default function Conflicts({ navigation, route }) {
 
           <InvolvedCounter counter={ val => setCount(val) }/>
 
-          <ImageAttachment onSubmit={() => navigateToHome() } report={report} onAttach={ val => setAttach(val)}/>
+          <ImageAttachment //onSubmit={() => navigateToHome() } 
+            report={report} //onAttach={ val => setAttach(val)}
+          />
 
         </ScrollView> 
 

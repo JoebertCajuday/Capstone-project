@@ -56,12 +56,12 @@ export default function ImageAttachment({onSubmit=()=>{}, onAttach=()=>{}, repor
 
     if(!images){ 
       setImages([obj])
-      onAttach(images ? true : null)
+      //onAttach(images ? true : null)
       return 
     }
 
     setImages(images => [...images, obj]);
-    onAttach(images ? true : null)
+    //onAttach(images ? true : null)
   }
 
 
@@ -69,39 +69,53 @@ export default function ImageAttachment({onSubmit=()=>{}, onAttach=()=>{}, repor
   const removeImage = (details) => {
     setImages(current => current.filter(img => { return img.uri !== details }) )
 
-    onAttach(images ? true : null)
+    //onAttach(images ? true : null)
   }
 
 
   const uploadPics = async () => {
-    setLoading(true)
+    //setLoading(true)
+
     images.map( async (e) => { 
       
         let resp = await upload_image(e, 'reports', 'reportattachments')
-        .catch(err => { return Alert.alert('Failed to upload image', `Please try again later. \n ${err}`)})
+        .catch(err => { 
+          //setLoading(false)
+          return Alert.alert('Failed to upload image', `Please try again later. \n ${err}`)
+        })
 
-        if(resp.error){ setLoading(false)
-          return Alert.alert('Failed to upload image', 'Please try again later')
-        }
+        //if(resp.error){ setLoading(false)
+         // return Alert.alert('Failed to upload image', 'Please try again later')
+        //}
 
         const { data, error } = await supabase.from('attachments')
         .insert([{ report_id: report?.id, file_url: resp?? null}])
 
-        if(error) { setLoading(false)
-          return Alert.alert('Failed to upload image', 'Please try again later')
+        if(error) { //setLoading(false)
+          return Alert.alert('Failed to upload', 'Please try again later')
         }
     })
 
-    setLoading(false)
+    //setLoading(false)
+    //onSubmit()
   }
+
 
 
 
   useEffect( () => {
     (async () => {
-      if(report && images){ await uploadPics() } // upload images
+      if(report){
+        if(images){ 
+          setLoading(true);
 
-      if(report) onSubmit() // Return to home if images is submitted
+          await uploadPics();
+          //https://serverless-api-fawn.vercel.app/api/insert
+          
+          setLoading(false);
+        }
+        //else{ onSubmit();}
+      }
     })() 
   }, [report])
 

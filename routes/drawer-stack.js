@@ -135,7 +135,7 @@ export default function DrawerNav({navigation}) {
 
   return(
    
-    <Drawer.Navigator initialRouteName="HomeStack" drawerContent={props => {
+    <Drawer.Navigator initialRouteName="HomeStack" detachInactiveScreens drawerContent={props => {
       return (
         <DrawerContentScrollView {...props}>
           <DrawerItemList {...props} />
@@ -148,7 +148,7 @@ export default function DrawerNav({navigation}) {
 
       <Drawer.Screen name="ProfileStack" component={ProfileStack} options={{headerShown:false, title:'Profile'}}/>
 
-      <Drawer.Screen name="ReportStack" component={ReportStack} options={{headerShown:false, title:'Reports'}}/>
+      <Drawer.Screen name="ReportStack" component={ReportStack} options={{headerShown:false, title:'Reports', unmountOnBlur: true}}/>
 
       <Drawer.Screen name="AboutStack" component={AboutStack} options={{headerShown:false, title:'About'}}/>
 

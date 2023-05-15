@@ -41,7 +41,7 @@ export default function Other({ navigation, route}) {
       location:       location,
       assistance:     null,
       message:        descrip,
-      attachments:    attachments,
+      attachments:    true,
       brgy:           barangay,
       number:         user?.number,
     }
@@ -87,7 +87,9 @@ export default function Other({ navigation, route}) {
 
             <ProblemDescription onInput={ value => setDescript(value)}/>
 
-            <ImageAttachment onSubmit={() => navigateToHome() } report={report} onAttach={ val => setAttach(val)}/>
+            <ImageAttachment //onSubmit={() => navigateToHome() } 
+              report={report} //onAttach={ val => setAttach(val)}
+            />
 
           </ScrollView>
 

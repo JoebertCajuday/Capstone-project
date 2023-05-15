@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, Image} from 'react-native';
-import ImageViewer from './image-viewer';
-import { MyVideoPlayer } from './video-component';
+import ImageViewer from '../components/image-viewer';
+import { MyVideoPlayer } from '../components/video-component';
 
 import { fetchImage } from '../queries/image-upload';
 

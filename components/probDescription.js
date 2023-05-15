@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
-import { StyleSheet, 
-  //Text, 
-  View, 
-  //TouchableOpacity, 
-  TextInput} from 'react-native';
+import { StyleSheet, View, TextInput} from 'react-native';
 //import { FontAwesome } from '@expo/vector-icons';
 
 export default function ProblemDescription({onInput=()=> {} ,...props}) {
 
-  const [inputState, setInputState] = useState(false)
+  //const [inputState, setInputState] = useState(false)
 
   return(
     <View style={styles.container}>
@@ -17,13 +13,6 @@ export default function ProblemDescription({onInput=()=> {} ,...props}) {
         multiline 
         onChangeText={text => onInput(text)}
         />
-      
-      {/*<TouchableOpacity style={{opacity: 1}} 
-        onPress={()=>console.log('hello')}
-        disabled={!inputState}
-      >
-          <FontAwesome style={{marginLeft: 5}} name='microphone' size={30} color='black' />
-        </TouchableOpacity>*/}
 
     </View>    
   );

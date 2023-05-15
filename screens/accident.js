@@ -38,7 +38,8 @@ export default function Accident({ navigation, route }) {
       location:     location?? null,
       assistance:   reqState,
       message:      message,
-      attachments:  attachments,
+      //attachments:  attachments,
+      attachments:  true,
       number:       user?.number,
       brgy:         barangay
     }
@@ -80,7 +81,9 @@ export default function Accident({ navigation, route }) {
 
             <OptionalMessage onChange={ text => setMessage(text) }/>
 
-            <ImageAttachment onSubmit={() => navigateToHome() } report={report} onAttach={ val => setAttach(val)}/>
+            <ImageAttachment //onSubmit={() => navigateToHome() } 
+              report={report} //onAttach={ val => setAttach(val)}
+            />
 
           </ScrollView>
 

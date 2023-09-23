@@ -8,7 +8,7 @@
     <li>React</li>
     <li>React Native</li>
     <li>Supabase</li>
-    <li></li>
+    <li>Tanstack Query</li>
 </ul>
 
 

@@ -7,7 +7,9 @@
 <ul>
     <li>React</li>
     <li>React Native</li>
+    <li>Expo</li>
     <li>Supabase</li>
+    <li>React Navigation</li>
     <li>Tanstack Query</li>
 </ul>
 

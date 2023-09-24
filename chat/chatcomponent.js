@@ -6,7 +6,7 @@ import LoadingScreen from '../components/loading';
 
 import { pushMessage, loadMessage, loadSilentMessage, pushSilentMessage, fetchSilentMessage, fetchNormalMessage } from '../queries/messages';
 import { Ionicons } from '@expo/vector-icons';
-import { fetchImage, upload_image,} from '../queries/image-upload';
+import { upload_image,} from '../queries/image-upload';
 import { fetchQuestions } from '../queries/submit-report';
 
 import supabase from '../lib/supabase';

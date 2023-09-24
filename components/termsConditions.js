@@ -5,7 +5,6 @@ import Modal from "react-native-modal";
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 
 
-
 export default function TermsConditions ({ toggleModal=()=>{}, agreed=()=>{}, ...props }) {
 
   const [isAgree, setIsAgree] = useState(false)

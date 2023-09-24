@@ -3,6 +3,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 
 
+
 export default function RescueHotlines ({ headerTitle, headerDescription, hotlineNum}) {
 
     const onCallPress = () => {

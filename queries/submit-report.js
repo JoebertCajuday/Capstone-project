@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import supabase from '../lib/supabase';
 
+
 const submit_report = async (object) => {
     try{
         const { data, error } = await supabase.from('reports')

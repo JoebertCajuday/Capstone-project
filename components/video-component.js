@@ -40,6 +40,7 @@ export default function VideoPlayerMe({source}) {
   );
 }
 
+
 export const MyVideoPlayer = ({source}) => {
   const [inFullscreen2, setInFullsreen2] = useState(false)
   const refVideo2 = useRef(null)

@@ -1,7 +1,7 @@
 import supabase from '../lib/supabase';
 //import * as FileSystem from 'expo-file-system';
 import { decode } from 'base64-arraybuffer';
-//import { ATTACHMENTS_URL } from '@env'
+
 
 const splitTest = function (str) { return str.split('\\').pop().split('/').pop() }
 

@@ -1,5 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
-import { StyleSheet, View, TouchableOpacity, ScrollView, TextInput, Alert, Image} from 'react-native';
+import { 
+    StyleSheet, 
+    View, 
+    TouchableOpacity, 
+    ScrollView, 
+    TextInput, 
+    Alert, 
+    Image
+} from 'react-native';
 import MessageContainer, { QuestionContainer, CameraAddon } from './chat-addons'
 import AttachmentDisplayer from './attach-component';
 import LoadingScreen from '../components/loading';

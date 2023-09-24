@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import supabase from '../lib/supabase';
 
 
+
 export const getRprt = async (report_id) => { // fetch specific reports
     try{
         const { data, error } = await supabase.from('reports')

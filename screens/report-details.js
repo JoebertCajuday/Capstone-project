@@ -10,7 +10,6 @@ import getProfile from '../queries/fetch-profile';
 import { getRprt } from '../queries/fetch-reports';
 
 
-
 export default function ReportDetails({navigation, route}) {
 
     const { data: user } = getProfile();

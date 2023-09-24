@@ -9,6 +9,7 @@ import getProfile, { hotlines } from '../queries/fetch-profile';
 import submit_report from '../queries/submit-report'
 
 
+
 export default function Rescue({ navigation, route }) {
 
   // For Headers

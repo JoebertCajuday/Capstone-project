@@ -31,6 +31,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   
+  
   input: {
     width: '100%',
     borderBottomWidth: 1, borderColor: '#999',

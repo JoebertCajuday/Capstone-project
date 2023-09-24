@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, ActivityIndicator} from 'react-native';
 import getProfile from '../queries/fetch-profile';
 
+
 ///////////////////////////////////////////////////////////////
 
 export default function Profile() {

@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TextInput, ScrollView} from 'react-native';
 
 
 
+
 export default function OptionalMessage ({onChange = () => {}}) {
 
   return(

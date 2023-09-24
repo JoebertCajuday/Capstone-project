@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 ////////////////////////////////////////////////////////////////
 
+
 import getProfile, { hotlines } from '../queries/fetch-profile';
 import { Loading } from '../components/loading';
 

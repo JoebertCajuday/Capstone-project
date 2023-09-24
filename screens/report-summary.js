@@ -9,6 +9,7 @@ import * as Print from 'expo-print';
 import { shareAsync } from 'expo-sharing';
 
 
+
 export default function ReportSummary({ navigation, route }) {
 
   const { data: user } = getProfile();

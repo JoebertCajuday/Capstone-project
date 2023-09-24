@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
+import { 
+    StyleSheet, 
+    Text, 
+    View, 
+    TouchableOpacity, 
+    Alert 
+} from 'react-native';
 
 import { fetchOptions } from '../queries/submit-report';
 import { pushSilentMessage } from '../queries/messages';

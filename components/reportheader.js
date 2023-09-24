@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, Image } from 'react-native';
 //import Location from './location';
 
+
 export default function ReportHeader({ darkmode, type, location, sender, ...props }) {
 
   return(

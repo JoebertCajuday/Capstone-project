@@ -13,6 +13,7 @@ import getBrgy from '../queries/fetch-brgy';
 
 
 
+
 const ImageWrapper = (props) => {
   return(
     <View style={{width: '70%', height: '70%'}}>

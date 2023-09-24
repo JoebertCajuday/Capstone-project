@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native';
 
 export const globalStyles = StyleSheet.create({
   
+  
   textInputWrapper: {//
     width: '100%',            
     justifyContent: 'flex-start', 

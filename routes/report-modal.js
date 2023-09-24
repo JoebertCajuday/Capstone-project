@@ -1,6 +1,16 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ActivityIndicator, Image, 
-    TouchableOpacity, ScrollView, Alert, Linking } from 'react-native';
+import { 
+    StyleSheet, 
+    Text, 
+    View, 
+    ActivityIndicator, 
+    Image, 
+    TouchableOpacity, 
+    ScrollView, 
+    Alert, 
+    Linking 
+} from 'react-native';
+
 
 import Modal from "react-native-modal";
 //import SelectList from 'react-native-dropdown-select-list';

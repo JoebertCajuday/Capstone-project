@@ -1,5 +1,11 @@
 import React from 'react';
-import { Image, View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { 
+  Image, 
+  View, 
+  TouchableOpacity, 
+  Text, 
+  StyleSheet 
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 import { AntDesign } from '@expo/vector-icons';

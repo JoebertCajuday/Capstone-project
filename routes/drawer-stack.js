@@ -6,7 +6,7 @@ import { DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navi
 import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 //import { MaterialCommunityIcons } from '@expo/vector-icons';
 //import getProfile from '../queries/fetch-profile';
-//import { Loading } from '../components/loading';
+
 
 /** Routes Folder */
 import About from './about';

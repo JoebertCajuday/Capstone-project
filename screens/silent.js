@@ -10,6 +10,7 @@ import submit_report from '../queries/submit-report'
 import getProfile from '../queries/fetch-profile';
 
 
+
 export default function Silent({navigation, route}) {
 
   const location = route.params?.location

@@ -11,6 +11,7 @@ const barangays = async () => {
         if(error) { 
             //return { error: error.message } 
             throw new Error(error.message)
+            
         }
         if(!data) { 
             //return { error: 'Some unknown error has occured' } 

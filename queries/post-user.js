@@ -2,6 +2,7 @@ import supabase from '../lib/supabase';
 //import { decode } from 'base64-arraybuffer';
 
 
+
 export default async function insertToProfile(obj) {
     try{
         const { data, error } = await supabase.from('users_profile')

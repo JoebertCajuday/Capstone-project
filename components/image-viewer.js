@@ -2,6 +2,7 @@ import React from 'react';
 import ImageView from 'react-native-image-viewing'
 
 
+
 export default function ImageViewer({ImageUri, visible, onClose = () => {}}) {
 
     const imgArray = [{uri: ImageUri, key: ImageUri}]

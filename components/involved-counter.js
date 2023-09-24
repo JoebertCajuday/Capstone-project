@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 
+
 export default function InvolvedCounter ({counter=()=>{}}) {
 
   const [count, setCount] = useState(0);

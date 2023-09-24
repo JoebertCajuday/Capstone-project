@@ -7,6 +7,7 @@ import * as SecureStore from 'expo-secure-store';
 import supabase from '../lib/supabase';
 
 
+
 export default function Logout({navigation}) {
 
   async function signOut() {

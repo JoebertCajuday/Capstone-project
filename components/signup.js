@@ -27,6 +27,7 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false); // For Loading screen
   const [errors, setErrors] = useState({}); // For error checking
 
+  
   const [inputs, setInputs] = useState({
     firstName: null,    
     middleName: null,

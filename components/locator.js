@@ -6,6 +6,7 @@ import * as Location from 'expo-location';
 import { Loading } from './loading';
 
 
+
 export default function Locator({onChangeLocation=()=>{}, isActive}) {
 
   const [markerLoc, setMarkerLoc] = useState({})
